@@ -12,7 +12,7 @@ const UserSchema = new Schema(
             type: String,
             required: true
         },
-        fullName:
+        full_name:
         {
             type: String,
             required: true
@@ -25,7 +25,7 @@ const UserSchema = new Schema(
         {
             type: String, required: true
         },
-        idRole: {
+        id_role: {
             type: mongoose.Schema.Types.ObjectId,
             ref: 'role'
         },

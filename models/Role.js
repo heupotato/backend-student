@@ -1,23 +1,33 @@
 const mongoose = require('mongoose');
 const mongooseDelete = require('mongoose-delete');
+const BaseModel = require('./BaseModel');
 
 const Schema = mongoose.Schema;
 
-const Role = new Schema(
+const RoleSchema = new Schema(
     {
         role: {
-            type:String, 
-            required:true
+            type: String,
+            required: true
         }
-    }, 
+    },
     {
-        collection: "role"
+        collection: "role",
+        toJSON: {
+            transform(doc, ret) {
+                delete ret.deleted;
+                delete ret._id
+            },
+            virtuals: true,
+        }
     }
 )
 
-Role.plugin(mongooseDelete, {
+RoleSchema.plugin(mongooseDelete, {
     deletedAt: true,
     overrideMethods: 'all'
 });
 
-module.exports = mongoose.model('role', Role);
+RoleSchema.loadClass(BaseModel)
+
+module.exports = mongoose.model('role', RoleSchema);
