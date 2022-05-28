@@ -1,9 +1,13 @@
-var express = require('express');
-var userRouter = require('./user')
+const express = require("express");
 
+const apiAuthRoutes = require('./api-auth-route');
+const apiUserRoutes = require('./user')
 
-function route(app){
-  app.use('/users', userRouter);
-}
+const apiRoutes = express.Router();
 
-module.exports = route;
+console.log("router")
+
+apiRoutes.use('/auth', apiAuthRoutes)
+apiRoutes.use('/user', apiUserRoutes)
+
+module.exports = apiRoutes
