@@ -1,0 +1,8 @@
+const succeed = {
+    LOGIN_SUCCEED: 'LOGIN_SUCCEED',
+    REGISTER_SUCCESS: 'REGISTER_SUCCESS',
+
+    GET_USERLIST_SUCESS: 'OBTAIN LIST USER SUCCESSFULLY'
+}
+
+module.exports = succeed
