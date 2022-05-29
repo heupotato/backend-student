@@ -1,4 +1,4 @@
-const authService = require('../services/api-auth-user')
+const authService = require('../services/auth-user')
 
 const login = (req, res) => {
     return authService.login(req, res)

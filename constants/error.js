@@ -7,7 +7,11 @@ const error = {
 
     // TOKEN
     UNAUTHORIZE: 'UNAUTHORIZED',
-    FORBIDDEN: 'FORBIDDEN'
+    FORBIDDEN: 'FORBIDDEN',
+
+    //POST 
+    CATEGORY_LIST_NOT_EXIST: 'CATEGORY_NOT_EXIST',
+    POST_NOT_FOUND: 'POST_NOT_FOUND',
 }
 
 module.exports = error

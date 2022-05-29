@@ -14,7 +14,7 @@ const getAllUser = async (req, res) => {
     }
 
     return res.json({
-        msg: SUCCEED.GET_USERLIST_SUCESS,
+        msg: SUCCEED.GET_USERLIST_SUCCESS,
         userList
     })
 }

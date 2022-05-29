@@ -2,7 +2,7 @@ const express = require('express')
 
 const authRoutes = express.Router();
 
-const authController = require('../controllers/api-auth-controller')
+const authController = require('../controllers/auth-controller')
 const authValidate = require('../validation/auth-validate')
 
 authRoutes.post('/login',
