@@ -23,11 +23,12 @@ const UserSchema = new Schema(
         },
         email:
         {
-            type: String, required: true
+            type: String,
+            required: true
         },
-        id_role: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: 'role'
+        role: {
+            type: String,
+            required: true
         },
         isBlocked: {
             type: Boolean,
@@ -51,7 +52,11 @@ const UserSchema = new Schema(
         toJSON: {
             transform(doc, ret) {
                 delete ret.password;
-                delete ret.isdeleted;
+                delete ret.__v;
+                delete ret.updatedAt;
+                delete ret.createdAt;
+                delete ret.deleted;
+                delete ret._id
             },
             virtuals: true,
         },

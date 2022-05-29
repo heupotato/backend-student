@@ -1,11 +1,10 @@
 const User = require("../models/User")
-const Role = require('../models/Role')
 const handleError = require('../general/Error')
 const ERROR = require('../constants/error')
 const SUCCEED = require('../constants/succeed')
 
 const getAllUser = async (req, res) => {
-    const userList = await User.find().populate('id_role')
+    const userList = await User.find()
     if (!userList) {
         const err = {
             code: 400,
