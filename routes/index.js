@@ -5,8 +5,6 @@ const apiUserRoutes = require('./user')
 
 const apiRoutes = express.Router();
 
-console.log("router")
-
 apiRoutes.use('/auth', apiAuthRoutes)
 apiRoutes.use('/user', apiUserRoutes)
 

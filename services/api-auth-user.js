@@ -1,6 +1,7 @@
 const Bcrypt = require('../general/Bcrypt')
 const JWT = require('../general/Jwt')
 
+const Role = require('../models/Role')
 const User = require('../models/User')
 const handleError = require('../general/Error')
 const ERROR = require('../constants/error')
@@ -43,7 +44,8 @@ const register = async (req, res) => {
         return handleError(res, err)
     }
     req.body.password = await Bcrypt.hash(password);
-    const user = await User.create(req.body);
+    req.body.id_role = await Role.findOne({ role: 'user' })
+    const user = await User.create(req.body)
     const token = await JWT.generateToken({ uid: user._id })
     return res.json({
         message: SUCCEED.REGISTER_SUCCESS,
