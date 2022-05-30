@@ -43,10 +43,10 @@ const PostSchema = new Schema(
         collection: 'post_news',
         toJSON: {
             transform(doc, ret) {
-                delete ret._id;
+                delete ret.id
                 delete ret.deleted;
                 delete ret.deletedAt;
-                delete ret.updatedAt
+                delete ret.lastUpdatedAt
             },
             virtuals: true,
         }

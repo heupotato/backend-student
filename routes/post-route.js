@@ -4,16 +4,35 @@ const postRoutes = express.Router()
 const postController = require('../controllers/post-controller')
 
 const auth = require('../middleware/authenticator')
+const paramsValidate = require('../validation/params-validate')
+const postValidate = require('../validation/post-validate')
 
 postRoutes.get('/categories',
     postController.getAllCategories
 );
 
-postRoutes.get('/news',
+postRoutes.get('/posts',
     postController.getAllPost
 )
 
-postRoutes.get('/news/:id',
-    postController.getPostById)
+postRoutes.get('/posts/:id',
+    paramsValidate.idParamValidate,
+    postController.getPostById
+)
+
+postRoutes.get('/categories/all-posts',
+    postValidate.getPostByCategoryValidate,
+    postController.getPostByCategory
+)
+
+postRoutes.put('/user/:userId/posts/:id',
+    auth.authenticateToken,
+    postController.updatePost
+)
+
+postRoutes.delete('/user/:userId/posts/:id',
+    auth.authenticateToken,
+    postController.deletePost
+)
 
 module.exports = postRoutes;

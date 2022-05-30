@@ -10,7 +10,7 @@ const getAllCategories = async (req, res) => {
             path: 'post',
             populate: {
                 path: 'id_user',
-                select: 'full_name id'
+                select: '_id full_name url_avatar'
             }
         }
     ])
@@ -29,7 +29,7 @@ const getAllCategories = async (req, res) => {
 }
 
 const getAllPost = async (req, res) => {
-    const postList = await Post.find();
+    const postList = await Post.find({ isDeleted: false });
     if (!postList) {
         const err = {
             code: 400,
@@ -46,14 +46,15 @@ const getAllPost = async (req, res) => {
 
 const getPostById = async (req, res) => {
     const { id } = req.params
-    const post = await Post.findById(id).populate({
+    console.log(id)
+    const post = await Post.findOne({ _id: id, isDeleted: false }).populate({
         path: 'id_user',
         select: 'full_name url_avatar'
     })
     if (!post) {
         const err = {
             code: 400,
-            message: ERROR.USER_NOT_FOUND
+            message: ERROR.POST_NOT_FOUND
         }
         return handleError(res, err)
     }
@@ -63,10 +64,71 @@ const getPostById = async (req, res) => {
     })
 }
 
+const getPostByCategory = async (req, res) => {
+    const { id_category } = req.body
+    const postList = await Post.find({ id_category: id_category })
+    return res.json({
+        msg: SUCCEED.GET_POST_SUCCESS,
+        postList
+    })
+}
+
+const updatePost = async (req, res) => {
+    const { id, userId } = req.params
+    const { id_user } = await Post.findById(id)
+    if (id_user.toString() !== userId) {
+        const err = {
+            code: 405,
+            message: ERROR.NOT_ALLOW
+        }
+        return handleError(res, err)
+    }
+    const newPost = await Post.findByIdAndUpdate(id, req.body, { new: true, })
+        .catch(error => {
+            const err = {
+                code: 400,
+                message: error.message
+            }
+            return handleError(res, err)
+        })
+    return res.json({
+        msg: SUCCEED.UPDATE_POST_SUCCESS,
+        newPost
+    })
+}
+
+const deletePost = async (req, res) => {
+    const { id, userId } = req.params
+    const { id_user } = await Post.findById(id)
+    if (id_user.toString() !== userId) {
+        const err = {
+            code: 405,
+            message: ERROR.NOT_ALLOW
+        }
+        return handleError(res, err)
+    }
+    const today = new Date()
+
+    await Post.findByIdAndUpdate(id, { isDeleted: true, deletedAt: today }, { new: true })
+        .catch(error => {
+            const err = {
+                code: 400,
+                message: error.message
+            }
+            return handleError(res, err)
+        })
+    return res.json({
+        msg: SUCCEED.DELETE_POST_SUCCESS,
+    })
+}
+
 const postService = {
     getAllCategories,
     getAllPost,
-    getPostById
+    getPostById,
+    getPostByCategory,
+    updatePost,
+    deletePost
 }
 
 module.exports = postService

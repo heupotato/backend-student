@@ -10,6 +10,10 @@ const CategorySchema = new Schema(
             type: String,
             required: true
         },
+        slug: {
+            type: String,
+            required: true
+        },
         post: [
             {
                 type: Schema.Types.ObjectId,
@@ -21,7 +25,7 @@ const CategorySchema = new Schema(
         collection: 'post_category',
         toJSON: {
             transform(doc, ret) {
-                delete ret._id;
+                delete ret.id;
                 delete ret.deleted;
                 delete ret.deletedAt;
                 delete ret.updatedAt

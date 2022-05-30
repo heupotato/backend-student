@@ -9,6 +9,6 @@ const apiRoutes = express.Router();
 
 apiRoutes.use('/auth', apiAuthRoutes)
 apiRoutes.use('/users', apiUserRoutes)
-apiRoutes.use('/post', apiPostRoutes)
+apiRoutes.use('/news', apiPostRoutes)
 
 module.exports = apiRoutes
