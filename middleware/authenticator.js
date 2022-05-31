@@ -2,9 +2,8 @@ const jwt = require('jsonwebtoken');
 const handleError = require('../general/Error')
 const ERROR = require('../constants/error')
 
-const authenticateManagerToken = (req, res, next) => {
-    const authHeader = req.headers.authorization
-    const token = authHeader
+const authenticateToken = (req, res, next) => {
+    const token = req.headers.authorization
 
     if (token == null) {
         const err = {
@@ -14,7 +13,7 @@ const authenticateManagerToken = (req, res, next) => {
         return handleError(res, err)
     }
     jwt.verify(token, process.env.JWT_SECRET, (err, data) => {
-        if (err || (data.role !== 'manager' && data.role !== 'admin')) {
+        if (err) {
             const err = {
                 code: 403,
                 message: ERROR.FORBIDDEN
@@ -25,8 +24,22 @@ const authenticateManagerToken = (req, res, next) => {
         next()
     })
 }
+
+const checkManagerRoles = (req, res, next) => {
+    const role = req.user.role
+    if (role !== 'manager' && role !== 'admin') {
+        const err = {
+            code: 405,
+            message: ERROR.NOT_ALLOW
+        }
+        return handleError(res, err)
+    }
+    next()
+}
+
 const auth = {
-    authenticateManagerToken
+    authenticateToken,
+    checkManagerRoles
 }
 
 module.exports = auth
