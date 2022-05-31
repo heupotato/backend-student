@@ -35,7 +35,7 @@ postRoutes.delete('/user/:userId/posts/:id',
     postController.deletePost
 )
 
-postRoutes.post('/posts/new',
+postRoutes.post('/posts',
     auth.authenticateToken,
     auth.checkManagerRoles,
     postValidate.createPostValidate,

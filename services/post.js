@@ -121,20 +121,11 @@ const deletePost = async (req, res) => {
 }
 
 const createPost = async (req, res) => {
-    try {
-        const newPost = await Post.create(req.body)
-        return res.json({
-            message: SUCCEED.CREATE_POST_SUCCESS,
-            newPost
-        })
-    }
-    catch (error) {
-        const err = {
-            code: 404,
-            message: error.message
-        }
-        return handleError(res, err)
-    }
+    const newPost = await Post.create(req.body)
+    return res.json({
+        message: SUCCEED.CREATE_POST_SUCCESS,
+        newPost
+    })
 
 }
 
