@@ -24,13 +24,18 @@ const deletePost = (req, res) => {
     return postService.deletePost(req, res)
 }
 
+const createPost = (req, res) => {
+    return postService.createPost(req, res)
+}
+
 const postController = {
     getAllCategories,
     getAllPost,
     getPostById,
     getPostByCategory,
     updatePost,
-    deletePost
+    deletePost,
+    createPost
 }
 
 module.exports = postController

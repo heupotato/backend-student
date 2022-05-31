@@ -2,33 +2,8 @@ const jwt = require('jsonwebtoken');
 const handleError = require('../general/Error')
 const ERROR = require('../constants/error')
 
-const authenticateManagerToken = (req, res, next) => {
-    const authHeader = req.headers.authorization
-    const token = authHeader
-
-    if (token == null) {
-        const err = {
-            code: 401,
-            message: ERROR.UNAUTHORIZE
-        }
-        return handleError(res, err)
-    }
-    jwt.verify(token, process.env.JWT_SECRET, (err, data) => {
-        if (err || (data.role !== 'manager' && data.role !== 'admin')) {
-            const err = {
-                code: 403,
-                message: ERROR.FORBIDDEN
-            }
-            return handleError(res, err)
-        }
-        req.user = data
-        next()
-    })
-}
-
 const authenticateToken = (req, res, next) => {
-    const authHeader = req.headers.authorization
-    const token = authHeader
+    const token = req.headers.authorization
 
     if (token == null) {
         const err = {
@@ -49,9 +24,22 @@ const authenticateToken = (req, res, next) => {
         next()
     })
 }
+
+const checkManagerRoles = (req, res, next) => {
+    const role = req.user.role
+    if (role !== 'manager' && role !== 'admin') {
+        const err = {
+            code: 405,
+            message: ERROR.NOT_ALLOW
+        }
+        return handleError(res, err)
+    }
+    next()
+}
+
 const auth = {
-    authenticateManagerToken,
-    authenticateToken
+    authenticateToken,
+    checkManagerRoles
 }
 
 module.exports = auth

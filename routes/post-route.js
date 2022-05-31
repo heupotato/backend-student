@@ -20,7 +20,7 @@ postRoutes.get('/posts/:id',
     postController.getPostById
 )
 
-postRoutes.get('/categories/all-posts',
+postRoutes.get('/categories/:id/posts',
     postValidate.getPostByCategoryValidate,
     postController.getPostByCategory
 )
@@ -33,6 +33,13 @@ postRoutes.put('/user/:userId/posts/:id',
 postRoutes.delete('/user/:userId/posts/:id',
     auth.authenticateToken,
     postController.deletePost
+)
+
+postRoutes.post('/posts/new',
+    auth.authenticateToken,
+    auth.checkManagerRoles,
+    postValidate.createPostValidate,
+    postController.createPost
 )
 
 module.exports = postRoutes;

@@ -4,7 +4,7 @@ const handleError = require('../general/Error')
 
 const getPostByCategoryValidate = async (req, res, next) => {
     try {
-        const value = await postSchema.categoriesSchema.validateAsync(req.body);
+        const value = await idParam.validateAsync(req.params);
         next()
     }
     catch (err) {
@@ -17,8 +17,23 @@ const getPostByCategoryValidate = async (req, res, next) => {
 
 }
 
+const createPostValidate = async (req, res, next) => {
+    try {
+        const value = await postSchema.newPostSchema.validateAsync(req.body)
+        next()
+    }
+    catch (err) {
+        const data = {
+            code: 400,
+            message: err.message
+        }
+        return handleError(res, data)
+    }
+}
+
 const postValidate = {
     getPostByCategoryValidate,
+    createPostValidate
 }
 
 module.exports = postValidate

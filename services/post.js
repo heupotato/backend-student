@@ -46,7 +46,6 @@ const getAllPost = async (req, res) => {
 
 const getPostById = async (req, res) => {
     const { id } = req.params
-    console.log(id)
     const post = await Post.findOne({ _id: id, isDeleted: false }).populate({
         path: 'id_user',
         select: 'full_name url_avatar'
@@ -65,8 +64,8 @@ const getPostById = async (req, res) => {
 }
 
 const getPostByCategory = async (req, res) => {
-    const { id_category } = req.body
-    const postList = await Post.find({ id_category: id_category })
+    const { id } = req.params
+    const postList = await Post.find({ id_category: id })
     return res.json({
         msg: SUCCEED.GET_POST_SUCCESS,
         postList
@@ -74,52 +73,87 @@ const getPostByCategory = async (req, res) => {
 }
 
 const updatePost = async (req, res) => {
-    const { id, userId } = req.params
-    const { id_user } = await Post.findById(id)
-    if (id_user.toString() !== userId) {
+    const { id } = req.params
+    const validate = await validateUser(req)
+
+    if (!validate.isValid)
+        return handleError(res, validate.err)
+
+    try {
+        const newPost = await Post.findByIdAndUpdate(id, req.body, { new: true, })
+        return res.json({
+            msg: SUCCEED.UPDATE_POST_SUCCESS,
+            newPost
+        })
+    }
+    catch (error) {
         const err = {
-            code: 405,
-            message: ERROR.NOT_ALLOW
+            code: 400,
+            message: error.message
         }
         return handleError(res, err)
     }
-    const newPost = await Post.findByIdAndUpdate(id, req.body, { new: true, })
-        .catch(error => {
-            const err = {
-                code: 400,
-                message: error.message
-            }
-            return handleError(res, err)
-        })
-    return res.json({
-        msg: SUCCEED.UPDATE_POST_SUCCESS,
-        newPost
-    })
+
 }
 
 const deletePost = async (req, res) => {
-    const { id, userId } = req.params
+    const { id } = req.params
+    const validate = await validateUser(req)
+
+    if (!validate.isValid)
+        return handleError(res, validate.err)
+
+    const today = new Date()
+    try {
+        await Post.findByIdAndUpdate(id, { isDeleted: true, deletedAt: today }, { new: true })
+
+        return res.json({
+            msg: SUCCEED.DELETE_POST_SUCCESS,
+        })
+    }
+    catch (error) {
+        const err = {
+            code: 400,
+            message: error.message
+        }
+        return handleError(res, err)
+    }
+}
+
+const createPost = async (req, res) => {
+    try {
+        const newPost = await Post.create(req.body)
+        return res.json({
+            message: SUCCEED.CREATE_POST_SUCCESS,
+            newPost
+        })
+    }
+    catch (error) {
+        const err = {
+            code: 404,
+            message: error.message
+        }
+        return handleError(res, err)
+    }
+
+}
+
+const validateUser = async (req) => {
+    const { userId, id } = req.params
     const { id_user } = await Post.findById(id)
     if (id_user.toString() !== userId) {
         const err = {
             code: 405,
             message: ERROR.NOT_ALLOW
         }
-        return handleError(res, err)
+        return {
+            isValid: false,
+            err: err
+        }
     }
-    const today = new Date()
-
-    await Post.findByIdAndUpdate(id, { isDeleted: true, deletedAt: today }, { new: true })
-        .catch(error => {
-            const err = {
-                code: 400,
-                message: error.message
-            }
-            return handleError(res, err)
-        })
-    return res.json({
-        msg: SUCCEED.DELETE_POST_SUCCESS,
-    })
+    return {
+        isValid: true
+    }
 }
 
 const postService = {
@@ -128,7 +162,8 @@ const postService = {
     getPostById,
     getPostByCategory,
     updatePost,
-    deletePost
+    deletePost,
+    createPost
 }
 
 module.exports = postService
