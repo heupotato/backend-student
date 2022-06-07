@@ -4,42 +4,31 @@ const mongooseDelete = require('mongoose-delete');
 
 const Schema = mongoose.Schema;
 
-const PostSchema = new Schema(
+const commentSchema = new Schema(
     {
         id_user: {
             type: Schema.Types.ObjectId,
             ref: 'user'
         },
+        id_post: {
+            type: Schema.Types.ObjectId,
+            ref: 'post_news'
+        },
         createdAt: {
             type: Date,
             required: true
         },
-        lastUpdatedAt: {
-            type: Date,
-            required: true
-        },
-        title: {
-            type: String,
-            required: true
-        },
-        content: {
-            type: String
-        },
         isDeleted: {
             type: Boolean,
-            required: true,
             default: false
         },
-        img_url: {
-            type: String
-        },
-        id_category: {
-            type: Schema.Types.ObjectId,
-            ref: 'post_category'
+        content: {
+            type: String,
+            required: true
         }
     },
     {
-        collection: 'post_news',
+        collection: 'post_comment',
         toJSON: {
             transform(doc, ret) {
                 delete ret.id
@@ -50,13 +39,13 @@ const PostSchema = new Schema(
             virtuals: true,
         }
     }
-)
+);
 
-PostSchema.plugin(mongooseDelete, {
+commentSchema.plugin(mongooseDelete, {
     deletedAt: true,
     overrideMethods: 'all'
 });
 
-PostSchema.loadClass(BaseModel)
+commentSchema.loadClass(BaseModel)
 
-module.exports = mongoose.model('post_news', PostSchema)
+module.exports = mongoose.model('post_comment', commentSchema)
