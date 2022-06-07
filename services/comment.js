@@ -49,8 +49,7 @@ const deleteComment = async (req, res) => {
 const validateUser = async (req) => {
     const { id } = req.params
     const { id_user } = await Comment.findById(id)
-    const role = req.user.role
-    const userId = req.user.uid
+    const { role, userId } = req.user
 
     if (role === 'admin' || role === 'manager')
         return {
