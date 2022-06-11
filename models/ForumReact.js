@@ -4,39 +4,23 @@ const mongooseDelete = require('mongoose-delete');
 
 const Schema = mongoose.Schema;
 
-const PostSchema = new Schema(
+const ForumReactSchema = new Schema(
     {
         id_user: {
             type: Schema.Types.ObjectId,
             ref: 'user'
         },
-        createdAt: {
-            type: Date,
-            required: true
+        id_post: {
+            type: Schema.Types.ObjectId,
+            ref: 'topic'
         },
-        lastUpdatedAt: {
-            type: Date,
-            required: true
-        },
-        title: {
+        type: {
             type: String,
             required: true
-        },
-        content: {
-            type: String
-        },
-        isDeleted: {
-            type: Boolean,
-            required: true,
-            default: false
-        },
-        img_url: {
-            type: String
-        },
-
+        }
     },
     {
-        collection: 'post_news',
+        collection: 'react',
         toJSON: {
             transform(doc, ret) {
                 delete ret.id
@@ -49,11 +33,11 @@ const PostSchema = new Schema(
     }
 )
 
-PostSchema.plugin(mongooseDelete, {
+ForumReactSchema.plugin(mongooseDelete, {
     deletedAt: true,
     overrideMethods: 'all'
 });
 
-PostSchema.loadClass(BaseModel)
+ForumReactSchema.loadClass(BaseModel)
 
-module.exports = mongoose.model('post_news', PostSchema)
+module.exports = mongoose.model('react', ForumReactSchema)
