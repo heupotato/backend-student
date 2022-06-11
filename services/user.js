@@ -60,7 +60,7 @@ const updateUser = async (req, res) => {
 
 const blockUser = async (req, res) => {
     const { id } = req.params
-    const { isBlocked } = req.body
+    const { isBlocked } = req.query
 
     if (!validateManage(req)) {
         const err = {
@@ -72,7 +72,7 @@ const blockUser = async (req, res) => {
 
     try {
         await User.findByIdAndUpdate(id, { isBlocked: isBlocked }, { new: true })
-        const message = isBlocked ? SUCCEED.BLOCK_USER_SUCCESS : SUCCEED.UNBLOCK_USER_SUCCESS
+        const message = isBlocked === 'true' ? SUCCEED.BLOCK_USER_SUCCESS : SUCCEED.UNBLOCK_USER_SUCCESS
         res.json({
             msg: message
         })

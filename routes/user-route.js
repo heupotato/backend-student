@@ -20,7 +20,7 @@ userRoutes.put('/:id',
     auth.authenticateToken,
     userController.updateUser)
 
-userRoutes.put('/block/:id',
+userRoutes.put('/:id/block',
     auth.authenticateToken,
     userValidate.blockUserValidate,
     userController.blockUser)

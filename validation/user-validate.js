@@ -3,7 +3,7 @@ const userSchema = require('./schema/user-schema')
 
 const blockUserValidate = async (req, res, next) => {
     try {
-        const value = await userSchema.blockSchema.validateAsync(req.body);
+        const value = await userSchema.blockSchema.validateAsync(req.query);
         next()
     }
     catch (err) {
