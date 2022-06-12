@@ -25,6 +25,13 @@ const login = async (req, res) => {
         }
         return handleError(res, err)
     }
+    if (user.isBlocked === true) {
+        const err = {
+            code: 405,
+            message: ERROR.NOT_ALLOW
+        }
+        return handleError(res, err)
+    }
     const token = await JWT.generateToken({ uid: user._id, role: user.role })
     return res.json({
         msg: SUCCEED.LOGIN_SUCCEED,
