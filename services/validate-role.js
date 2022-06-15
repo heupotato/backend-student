@@ -1,3 +1,4 @@
+const ERROR = require('../constants/error')
 const validateOwner = (req, id_user) => {
     const { uid } = req.user
     if (id_user.toString() !== uid.toString()) {
@@ -15,6 +16,16 @@ const validateOwner = (req, id_user) => {
     }
 }
 
-const validateRole = {
-    validateOwner
+const checkManagerRole = (req) => {
+    const { role } = req.user
+    if (role === 'admin' || role === 'manager')
+        return true
+    return false
 }
+
+const validateRole = {
+    validateOwner,
+    checkManagerRole
+}
+
+module.exports = validateRole

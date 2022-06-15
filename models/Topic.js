@@ -19,7 +19,12 @@ const TopicSchema = new Schema(
                 type: Schema.Types.ObjectId,
                 ref: 'post_forum'
             }
-        ]
+        ],
+        isDeleted: {
+            type: Boolean,
+            required: true,
+            default: false
+        }
     },
     {
         collection: 'topic',

@@ -17,6 +17,11 @@ const ForumReactSchema = new Schema(
         type: {
             type: String,
             required: true
+        },
+        isDeleted: {
+            type: Boolean,
+            required: true,
+            default: false
         }
     },
     {

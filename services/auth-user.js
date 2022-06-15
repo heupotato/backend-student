@@ -7,7 +7,6 @@ const ERROR = require('../constants/error')
 const SUCCEED = require('../constants/succeed')
 
 const login = async (req, res) => {
-    console.log(req.body)
     const { username, password } = req.body;
     const user = await User.findOne({ username: username });
     if (!user) {

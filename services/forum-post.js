@@ -1,12 +1,12 @@
 const Thread = require('../models/Thread')
 const Topic = require('../models/Topic')
 const ForumPost = require('../models/ForumPost')
-const ForumComment = require('../models/ForumComment')
 
 const handleError = require('../general/Error')
 const ERROR = require('../constants/error')
 const SUCCEED = require('../constants/succeed')
-const ForumReact = require('../models/ForumReact')
+const validateRole = require('./validate-role')
+
 
 
 const getAllThreads = async (req, res) => {
@@ -20,7 +20,14 @@ const getAllThreads = async (req, res) => {
 
 const getAllTopicsByThreadId = async (req, res) => {
     const { id } = req.params
-    const topicList = await Topic.find({ id_thread: id, isDeleted: false }).populate('post_ids')
+    const topicList = await Topic.find({ id_thread: id, isDeleted: false })
+        .populate({
+            path: 'post_ids',
+            populate: {
+                path: 'id_user',
+                select: 'full_name url_avatar'
+            }
+        })
         .sort({
             createdAt: 1
         })
@@ -34,6 +41,14 @@ const getAllTopicsByThreadId = async (req, res) => {
 const getAllPostsByTopicId = async (req, res) => {
     const { id } = req.params
     const postList = await ForumPost.find({ id_topic: id, isDeleted: false })
+        .populate(
+            [
+                {
+                    path: 'id_user',
+                    select: 'full_name url_avatar'
+                }
+            ]
+        )
         .sort({
             createdAt: -1
         })
@@ -43,19 +58,6 @@ const getAllPostsByTopicId = async (req, res) => {
         postList
     })
 
-}
-
-const getAllCommentsByPostId = async (req, res) => {
-    const { id } = req.params
-    const commentList = await ForumComment.find({ id_post: id, isDeleted: false })
-        .sort({
-            createdAt: -1
-        })
-
-    return res.json({
-        msg: SUCCEED.GET_POST_SUCCESS,
-        commentList
-    })
 }
 
 const createTopic = async (req, res) => {
@@ -84,12 +86,6 @@ const createTopic = async (req, res) => {
 
 const updateTopic = async (req, res) => {
     const { id } = req.params
-
-    const { id_user } = await Topic.findById(id)
-    const validate = validateRole.validateOwner(req, id_user)
-    if (!validate.isValid)
-        return handleError(res, validate.err)
-
     try {
         const newTopic = await Topic.findByIdAndUpdate(id, req.body, { new: true })
         return res.json({
@@ -106,26 +102,106 @@ const updateTopic = async (req, res) => {
     }
 }
 
+const deleteTopic = async (req, res) => {
+    const { id } = req.params
+    try {
+        const newTopic = await Topic.findByIdAndUpdate(id, { isDeleted: true }, { new: true })
+        return res.json({
+            msg: SUCCEED.DELETE_TOPIC_SUCCESS,
+        })
+    }
+    catch (error) {
+        const err = {
+            code: 400,
+            message: error.message
+        }
+        return handleError(res, err)
+    }
+}
 
-const createReact = async (req, res) => {
+const getPostById = async (req, res) => {
+    const { id } = req.params
+    console.log(id)
+    const newPost = await ForumPost.findOne({ _id: id, isDeleted: false }).populate('id_user', 'full_name url_avatar role')
+    if (!newPost) {
+        const err = {
+            code: 404,
+            message: ERROR.POST_NOT_FOUND
+        }
+        return handleError(res, err)
+    }
+
+    return res.json({
+        code: 200,
+        message: SUCCEED.GET_POST_SUCCESS,
+        newPost
+    })
+}
+
+const createPost = async (req, res) => {
     const { id } = req.params
     const { uid } = req.user
-    const { reactType } = req.query
-    console.log(typeof reactType);
-    const type = reactType === '0' ? 'Dislike' : 'Like'
-    var isNewReact = true
     try {
-        if (await ForumReact.findOne({ id_post: id, id_user: uid })) {
-            isNewReact = false
-        }
-        const newReact = isNewReact
-            ? await ForumReact.create({
-                id_post: id, id_user: uid, type: type
-            })
-            : await ForumReact.findOneAndUpdate({ id_post: id, id_user: uid }, { type: type }, { new: true })
+        const newPost = await ForumPost.create({ ...req.body, id_topic: id, id_user: uid })
+        await Topic.findByIdAndUpdate(id,
+            {
+                '$addToSet': { 'post_ids': newPost._id }
+            }
+        )
         return res.json({
-            msg: SUCCEED.CREATE_REACT_SUCCESS,
-            newReact
+            msg: SUCCEED.CREATE_POST_SUCCESS,
+            newPost
+        })
+    }
+    catch (error) {
+        const err = {
+            code: 400,
+            message: error.message
+        }
+        return handleError(res, err)
+    }
+}
+
+const updatePost = async (req, res) => {
+    const { id } = req.params
+    const { id_user } = await ForumPost.findById(id)
+
+    const validateUser = validateRole.validateOwner(req, id_user)
+
+    if (!validateUser.isValid) {
+        return handleError(res, validateUser.err)
+    }
+
+    try {
+        const newPost = await ForumPost.findByIdAndUpdate(id, req.body, { new: true })
+        return res.json({
+            msg: SUCCEED.UPDATE_POST_SUCCESS,
+            newPost
+        })
+    }
+    catch (error) {
+        const err = {
+            code: 400,
+            message: error.message
+        }
+        return handleError(res, err)
+    }
+}
+
+const deletePost = async (req, res) => {
+    const { id } = req.params
+    const { id_user } = await ForumPost.findById(id)
+
+    const validateUser = validateRole.validateOwner(req, id_user)
+
+    if (!validateUser.isValid) {
+        return handleError(res, validateUser.err)
+    }
+
+    try {
+        await ForumPost.findByIdAndUpdate(id, { isDeleted: true }, { new: true })
+        return res.json({
+            msg: SUCCEED.DELETE_POST_SUCCESS
         })
     }
     catch (error) {
@@ -137,14 +213,18 @@ const createReact = async (req, res) => {
     }
 
 }
+
 const forumPostService = {
     getAllThreads,
     getAllTopicsByThreadId,
     getAllPostsByTopicId,
-    getAllCommentsByPostId,
-    createReact,
+    getPostById,
     createTopic,
-    updateTopic
+    updateTopic,
+    deleteTopic,
+    createPost,
+    updatePost,
+    deletePost
 }
 
 module.exports = forumPostService
