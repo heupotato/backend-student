@@ -44,7 +44,7 @@ const getAllPost = async (req, res) => {
     })
 }
 
-const getPostById = async (req, res) => {
+const getOnePost = async (req, res) => {
     const { id } = req.params
     const post = await Post.findOne({ _id: id, isDeleted: false }).populate({
         path: 'id_user',
@@ -150,7 +150,7 @@ const validateUser = async (req) => {
 const postService = {
     getAllCategories,
     getAllPost,
-    getPostById,
+    getOnePost,
     getPostByCategory,
     updatePost,
     deletePost,

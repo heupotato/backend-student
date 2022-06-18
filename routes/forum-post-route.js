@@ -15,7 +15,7 @@ apiForumPostRoutes.get('/topics/:id/posts',
     forumPostController.getAllPostsByTopicId)
 
 apiForumPostRoutes.get('/posts/:id',
-    forumPostController.getPostById)
+    forumPostController.getOnePost)
 
 apiForumPostRoutes.post('/threads/:id/topics',
     auth.authenticateToken,

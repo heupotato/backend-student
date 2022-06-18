@@ -119,7 +119,7 @@ const deleteTopic = async (req, res) => {
     }
 }
 
-const getPostById = async (req, res) => {
+const getOnePost = async (req, res) => {
     const { id } = req.params
     console.log(id)
     const newPost = await ForumPost.findOne({ _id: id, isDeleted: false }).populate('id_user', 'full_name url_avatar role')
@@ -218,7 +218,7 @@ const forumPostService = {
     getAllThreads,
     getAllTopicsByThreadId,
     getAllPostsByTopicId,
-    getPostById,
+    getOnePost,
     createTopic,
     updateTopic,
     deleteTopic,

@@ -24,8 +24,8 @@ const deleteTopic = (req, res) => {
     return forumPostService.deleteTopic(req, res)
 }
 
-const getPostById = (req, res) => {
-    return forumPostService.getPostById(req, res)
+const getOnePost = (req, res) => {
+    return forumPostService.getOnePost(req, res)
 }
 
 const createPost = (req, res) => {
@@ -46,7 +46,7 @@ const forumPostController = {
     createTopic,
     updateTopic,
     deleteTopic,
-    getPostById,
+    getOnePost,
     createPost,
     updatePost,
     deletePost
