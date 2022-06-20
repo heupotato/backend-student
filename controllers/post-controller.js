@@ -8,8 +8,8 @@ const getAllPost = (req, res) => {
     return postService.getAllPost(req, res)
 }
 
-const getPostById = (req, res) => {
-    return postService.getPostById(req, res)
+const getOnePost = (req, res) => {
+    return postService.getOnePost(req, res)
 }
 
 const getPostByCategory = (req, res) => {
@@ -31,7 +31,7 @@ const createPost = (req, res) => {
 const postController = {
     getAllCategories,
     getAllPost,
-    getPostById,
+    getOnePost,
     getPostByCategory,
     updatePost,
     deletePost,

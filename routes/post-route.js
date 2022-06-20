@@ -17,7 +17,7 @@ postRoutes.get('/posts',
 
 postRoutes.get('/posts/:id',
     paramsValidate.idParamValidate,
-    postController.getPostById
+    postController.getOnePost
 )
 
 postRoutes.get('/categories/:id/posts',

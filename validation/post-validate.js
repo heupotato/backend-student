@@ -1,6 +1,9 @@
-const postSchema = require('./schema/post-schema')
+
 const idParam = require('./schema/id-param')
-const handleError = require('../general/Error')
+const handleError = require('../general/Error');
+const reactSchema = require('./schema/react-schema');
+const TopicSchema = require('./schema/topic-schema');
+const postSchema = require('./schema/post-schema');
 
 const getPostByCategoryValidate = async (req, res, next) => {
     try {
@@ -30,6 +33,7 @@ const createPostValidate = async (req, res, next) => {
         return handleError(res, data)
     }
 }
+
 
 const postValidate = {
     getPostByCategoryValidate,
