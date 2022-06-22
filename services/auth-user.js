@@ -12,7 +12,8 @@ const login = async (req, res) => {
     if (!user) {
         const err = {
             code: 400,
-            message: ERROR.USER_NOT_FOUND
+            message: ERROR.USER_NOT_FOUND,
+            res: 0
         }
         return handleError(res, err)
     }
@@ -20,21 +21,24 @@ const login = async (req, res) => {
     if (!correctPassword) {
         const err = {
             code: 400,
-            message: ERROR.INCORRECT_PASSWORD
+            message: ERROR.INCORRECT_PASSWORD, 
+            res: 0
         }
         return handleError(res, err)
     }
     if (user.isBlocked === true) {
         const err = {
             code: 405,
-            message: ERROR.NOT_ALLOW
+            message: ERROR.NOT_ALLOW, 
+            res: 0
         }
         return handleError(res, err)
     }
     const token = await JWT.generateToken({ uid: user._id, role: user.role })
     return res.json({
         msg: SUCCEED.LOGIN_SUCCEED,
-        token
+        token, 
+        res: 1
     })
 }
 
@@ -43,7 +47,8 @@ const register = async (req, res) => {
     if (await User.exists({ username: username })) {
         const err = {
             code: 400,
-            message: ERROR.USERNAME_ALREADY_EXIST
+            message: ERROR.USERNAME_ALREADY_EXIST, 
+            res: 0
         }
         return handleError(res, err)
     }
@@ -53,7 +58,8 @@ const register = async (req, res) => {
     const token = await JWT.generateToken({ uid: user._id, role: user.role })
     return res.json({
         message: SUCCEED.REGISTER_SUCCESS,
-        token
+        token,
+        res: 1
     })
 }
 

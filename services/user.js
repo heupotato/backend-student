@@ -8,14 +8,16 @@ const getAllUser = async (req, res) => {
     if (!userList) {
         const err = {
             code: 400,
-            message: ERROR.USER_LIST_NOT_EXIST
+            message: ERROR.USER_LIST_NOT_EXIST,
+            res: 0
         }
         return handleError(res, err)
     }
 
     return res.json({
         msg: SUCCEED.GET_USERLIST_SUCCESS,
-        userList
+        data: userList,
+        res: 1
     })
 }
 
@@ -25,14 +27,16 @@ const getUserById = async (req, res) => {
     if (!user) {
         const err = {
             code: 400,
-            message: ERROR.USER_NOT_FOUND
+            message: ERROR.USER_NOT_FOUND,
+            res: 0
         }
         return handleError(res, err)
     }
 
     return res.json({
         msg: SUCCEED.GET_USER_SUCCESS,
-        user
+        data: user,
+        res: 1
     })
 }
 
@@ -46,13 +50,15 @@ const updateUser = async (req, res) => {
         const newUser = await User.findByIdAndUpdate(id, req.body, { new: true, })
         res.json({
             msg: SUCCEED.UPDATE_USER_SUCCESS,
-            newUser
+            data: newUser,
+            res: 1
         })
     }
     catch (error) {
         const err = {
             code: 400,
-            message: error.message
+            message: error.message, 
+            res: 0
         }
         return handleError(res, err)
     }
@@ -65,7 +71,8 @@ const blockUser = async (req, res) => {
     if (!validateManage(req)) {
         const err = {
             code: 405,
-            message: ERROR.NOT_ALLOW
+            message: ERROR.NOT_ALLOW,
+            res: 0
         }
         return handleError(res, err)
     }
@@ -74,13 +81,15 @@ const blockUser = async (req, res) => {
         await User.findByIdAndUpdate(id, { isBlocked: isBlocked }, { new: true })
         const message = isBlocked === 'true' ? SUCCEED.BLOCK_USER_SUCCESS : SUCCEED.UNBLOCK_USER_SUCCESS
         res.json({
-            msg: message
+            msg: message,
+            res: 1
         })
     }
     catch (error) {
         const err = {
             code: 400,
-            message: error.message
+            message: error.message, 
+            res: 0
         }
         return handleError(res, err)
     }
@@ -96,7 +105,8 @@ const validateUser = async (req, id) => {
     if (uid !== id) {
         const err = {
             code: 405,
-            message: ERROR.NOT_ALLOW
+            message: ERROR.NOT_ALLOW,
+            res: 0
         }
         return {
             isValid: false,

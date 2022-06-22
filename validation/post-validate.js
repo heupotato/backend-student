@@ -13,7 +13,8 @@ const getPostByCategoryValidate = async (req, res, next) => {
     catch (err) {
         const data = {
             code: 400,
-            message: err.message
+            message: err.message, 
+            res: 0
         }
         return handleError(res, data)
     }
@@ -28,7 +29,8 @@ const createPostValidate = async (req, res, next) => {
     catch (err) {
         const data = {
             code: 400,
-            message: err.message
+            message: err.message, 
+            res: 0
         }
         return handleError(res, data)
     }

@@ -17,14 +17,16 @@ const getAllCategories = async (req, res) => {
     if (!categoryList) {
         const err = {
             code: 400,
-            message: ERROR.CATEGORY_LIST_NOT_EXIST
+            message: ERROR.CATEGORY_LIST_NOT_EXIST,
+            res: 0
         }
         return handleError(res, err)
     }
 
     return res.json({
         msg: SUCCEED.GET_CATEGORYLIST_SUCCESS,
-        categoryList
+        data: categoryList, 
+        res: 1
     })
 }
 
@@ -40,7 +42,8 @@ const getAllPost = async (req, res) => {
 
     return res.json({
         msg: 'success',
-        postList
+        data: postList, 
+        res: 1
     })
 }
 
@@ -53,13 +56,15 @@ const getOnePost = async (req, res) => {
     if (!post) {
         const err = {
             code: 400,
-            message: ERROR.POST_NOT_FOUND
+            message: ERROR.POST_NOT_FOUND, 
+            res: 0
         }
         return handleError(res, err)
     }
     return res.json({
         msg: SUCCEED.GET_POST_SUCCESS,
-        post
+        data: post, 
+        res: 1
     })
 }
 
@@ -68,7 +73,8 @@ const getPostByCategory = async (req, res) => {
     const postList = await Post.find({ id_category: id })
     return res.json({
         msg: SUCCEED.GET_POST_SUCCESS,
-        postList
+        data: postList, 
+        res: 1
     })
 }
 
@@ -83,13 +89,15 @@ const updatePost = async (req, res) => {
         const newPost = await Post.findByIdAndUpdate(id, req.body, { new: true, })
         return res.json({
             msg: SUCCEED.UPDATE_POST_SUCCESS,
-            newPost
+            data: newPost, 
+            res: 1
         })
     }
     catch (error) {
         const err = {
             code: 400,
-            message: error.message
+            message: error.message, 
+            res: 0
         }
         return handleError(res, err)
     }
@@ -109,12 +117,14 @@ const deletePost = async (req, res) => {
 
         return res.json({
             msg: SUCCEED.DELETE_POST_SUCCESS,
+            res: 1
         })
     }
     catch (error) {
         const err = {
             code: 400,
-            message: error.message
+            message: error.message, 
+            res: 0
         }
         return handleError(res, err)
     }
@@ -124,7 +134,8 @@ const createPost = async (req, res) => {
     const newPost = await Post.create(req.body)
     return res.json({
         message: SUCCEED.CREATE_POST_SUCCESS,
-        newPost
+        data: newPost,
+        res: 1
     })
 
 }
@@ -135,7 +146,8 @@ const validateUser = async (req) => {
     if (id_user.toString() !== userId) {
         const err = {
             code: 405,
-            message: ERROR.NOT_ALLOW
+            message: ERROR.NOT_ALLOW, 
+            res: 0
         }
         return {
             isValid: false,

@@ -10,7 +10,8 @@ const loginValidate = async (req, res, next) => {
     catch (err) {
         const data = {
             code: 400,
-            message: err.message
+            message: err.message,
+            res: 0
         }
         return handleError(res, data)
     }
@@ -24,7 +25,8 @@ const registerValidate = async (req, res, next) => {
     catch (err) {
         const data = {
             code: 400,
-            message: err.message
+            message: err.message,
+            res: 0
         }
         return handleError(res, data)
     }
