@@ -8,7 +8,8 @@ const authenticateToken = (req, res, next) => {
     if (token == null) {
         const err = {
             code: 401,
-            message: ERROR.UNAUTHORIZE
+            message: ERROR.UNAUTHORIZE, 
+            res: 0
         }
         return handleError(res, err)
     }
@@ -16,7 +17,8 @@ const authenticateToken = (req, res, next) => {
         if (err) {
             const err = {
                 code: 403,
-                message: ERROR.FORBIDDEN
+                message: ERROR.FORBIDDEN, 
+                res: 0
             }
             return handleError(res, err)
         }
@@ -30,7 +32,8 @@ const checkManagerRoles = (req, res, next) => {
     if (role !== 'manager' && role !== 'admin') {
         const err = {
             code: 405,
-            message: ERROR.NOT_ALLOW
+            message: ERROR.NOT_ALLOW, 
+            res: 0
         }
         return handleError(res, err)
     }

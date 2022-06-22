@@ -9,7 +9,8 @@ const newCommentValidate = async (res, req, next) => {
     catch (err) {
         const data = {
             code: 400,
-            message: err.message
+            message: err.message, 
+            res: 0
         }
         return handleError(res, data)
     }

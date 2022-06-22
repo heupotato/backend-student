@@ -14,7 +14,8 @@ const createPostValidate = async (req, res, next) => {
     catch (err) {
         const data = {
             code: 400,
-            message: err.message
+            message: err.message, 
+            res: 0
         }
         return handleError(res, data)
     }
@@ -28,7 +29,8 @@ const createReactValidate = async (req, res, next) => {
     catch (err) {
         const data = {
             code: 400,
-            message: err.message
+            message: err.message, 
+            res: 0
         }
         return handleError(res, data)
     }
@@ -42,7 +44,8 @@ const createTopicValidate = async (req, res, next) => {
     catch (err) {
         const data = {
             code: 400,
-            message: err.message
+            message: err.message, 
+            res: 0
         }
         return handleError(res, data)
     }
@@ -56,7 +59,8 @@ const createCommentValidate = async (req, res, next) => {
     catch (err) {
         const data = {
             code: 400,
-            message: err.message
+            message: err.message, 
+            res: 0
         }
         return handleError(res, data)
     }

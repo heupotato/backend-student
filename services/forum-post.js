@@ -14,7 +14,8 @@ const getAllThreads = async (req, res) => {
 
     return res.json({
         msg: SUCCEED.GET_THREADLIST_SUCCESS,
-        threadList
+        data: threadList, 
+        res: 1
     })
 }
 
@@ -34,7 +35,8 @@ const getAllTopicsByThreadId = async (req, res) => {
 
     return res.json({
         msg: SUCCEED.GET_TOPICLIST_SUCCESS,
-        topicList
+        data: topicList, 
+        res: 1
     })
 }
 
@@ -55,7 +57,8 @@ const getAllPostsByTopicId = async (req, res) => {
 
     return res.json({
         msg: SUCCEED.GET_POST_SUCCESS,
-        postList
+        data: postList, 
+        res: 1
     })
 
 }
@@ -71,13 +74,15 @@ const createTopic = async (req, res) => {
         )
         return res.json({
             msg: SUCCEED.CREATE_TOPIC_SUCCESS,
-            newTopic
+            data: newTopic,
+            res: 1
         })
     }
     catch (error) {
         const err = {
             code: 400,
-            message: error.message
+            message: error.message,
+            res: 0
         }
         return handleError(res, err)
     }
@@ -90,13 +95,15 @@ const updateTopic = async (req, res) => {
         const newTopic = await Topic.findByIdAndUpdate(id, req.body, { new: true })
         return res.json({
             msg: SUCCEED.UPDATE_TOPIC_SUCCESS,
-            newTopic
+            data: newTopic,
+            res: 1
         })
     }
     catch (error) {
         const err = {
             code: 400,
-            message: error.message
+            message: error.message,
+            res: 0
         }
         return handleError(res, err)
     }
@@ -108,12 +115,14 @@ const deleteTopic = async (req, res) => {
         const newTopic = await Topic.findByIdAndUpdate(id, { isDeleted: true }, { new: true })
         return res.json({
             msg: SUCCEED.DELETE_TOPIC_SUCCESS,
+            res: 1
         })
     }
     catch (error) {
         const err = {
             code: 400,
-            message: error.message
+            message: error.message,
+            res: 0
         }
         return handleError(res, err)
     }
@@ -126,15 +135,16 @@ const getOnePost = async (req, res) => {
     if (!newPost) {
         const err = {
             code: 404,
-            message: ERROR.POST_NOT_FOUND
+            message: ERROR.POST_NOT_FOUND,
+            res: 0
         }
         return handleError(res, err)
     }
 
     return res.json({
-        code: 200,
         message: SUCCEED.GET_POST_SUCCESS,
-        newPost
+        data: newPost,
+        res: 1
     })
 }
 
@@ -150,13 +160,15 @@ const createPost = async (req, res) => {
         )
         return res.json({
             msg: SUCCEED.CREATE_POST_SUCCESS,
-            newPost
+            data: newPost,
+            res: 1
         })
     }
     catch (error) {
         const err = {
             code: 400,
-            message: error.message
+            message: error.message,
+            res: 0
         }
         return handleError(res, err)
     }
@@ -176,13 +188,15 @@ const updatePost = async (req, res) => {
         const newPost = await ForumPost.findByIdAndUpdate(id, req.body, { new: true })
         return res.json({
             msg: SUCCEED.UPDATE_POST_SUCCESS,
-            newPost
+            data: newPost,
+            res: 1
         })
     }
     catch (error) {
         const err = {
             code: 400,
-            message: error.message
+            message: error.message, 
+            res: 0
         }
         return handleError(res, err)
     }
@@ -201,13 +215,15 @@ const deletePost = async (req, res) => {
     try {
         await ForumPost.findByIdAndUpdate(id, { isDeleted: true }, { new: true })
         return res.json({
-            msg: SUCCEED.DELETE_POST_SUCCESS
+            msg: SUCCEED.DELETE_POST_SUCCESS, 
+            res: 1
         })
     }
     catch (error) {
         const err = {
             code: 400,
-            message: error.message
+            message: error.message, 
+            res: 0
         }
         return handleError(res, err)
     }

@@ -16,7 +16,8 @@ const getAllCommentsByPostId = async (req, res) => {
 
     return res.json({
         msg: SUCCEED.GET_COMMENT_SUCCESS,
-        commentList
+        data: commentList,
+        res: 1
     })
 }
 
@@ -32,13 +33,15 @@ const createComment = async (req, res) => {
         )
         return res.json({
             msg: SUCCEED.CREATE_COMMENT_SUCCESS,
-            newComment
+            data: newComment,
+            res: 1
         })
     }
     catch (error) {
         const err = {
             code: 400,
-            message: error.message
+            message: error.message,
+            res: 0
         }
         return handleError(res, err)
     }
@@ -57,13 +60,15 @@ const deleteComment = async (req, res) => {
     try {
         await ForumComment.findByIdAndUpdate(id, { isDeleted: true })
         return res.json({
-            msg: SUCCEED.DELETE_COMMENT_SUCCESS
+            msg: SUCCEED.DELETE_COMMENT_SUCCESS,
+            res: 1
         })
     }
     catch (error) {
         const err = {
             code: 400,
-            message: error.message
+            message: error.message,
+            res: 0
         }
         return handleError(res, err)
     }
@@ -81,13 +86,15 @@ const updateComment = async (req, res) => {
         const newComment = await ForumComment.findByIdAndUpdate(id, req.body, { new: true })
         return res.json({
             msg: SUCCEED.UPDATE_COMMENT_SUCCESS,
-            newComment
+            data: newComment,
+            res: 1
         })
     }
     catch (error) {
         const err = {
             code: 400,
-            message: error.message
+            message: error.message, 
+            res: 0
         }
         return handleError(res, err)
     }
@@ -115,13 +122,15 @@ const createReact = async (req, res) => {
 
         return res.json({
             msg: SUCCEED.CREATE_REACT_SUCCESS,
-            newReact
+            data: newReact, 
+            res: 1
         })
     }
     catch (error) {
         const err = {
             code: 400,
-            message: error.message
+            message: error.message,
+            res: 0
         }
         return handleError(res, err)
     }
@@ -139,13 +148,14 @@ const deleteReact = async (req, res) => {
         const newReact = await ForumReact.findByIdAndUpdate(id, { isDeleted: true }, { new: true })
         return res.json({
             msg: SUCCEED.DELETE_REACT_SUCCESS,
-            newReact
+            res: 1
         })
     }
     catch (error) {
         const err = {
             code: 400,
-            message: error.message
+            message: error.message, 
+            res: 1
         }
         return handleError(res, err)
     }
@@ -158,7 +168,8 @@ const getAllReactsByPostIds = async (req, res) => {
 
     return res.json({
         msg: SUCCEED.GET_REACT_SUCCESS,
-        reactList
+        data: reactList,
+        res: 1
     })
 }
 const forumCommentService = {
