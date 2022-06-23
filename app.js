@@ -41,7 +41,7 @@ app.use(function (err, req, res, next) {
 const main = async () => {
   try {
     await connectDB()
-    app.listen(port, () => {
+    app.listen(process.env.PORT || port, () => {
       console.log("Server running at http://localhost:" + port);
     })
   } catch (err) {
