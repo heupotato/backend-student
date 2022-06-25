@@ -42,4 +42,7 @@ postRoutes.post('/posts',
     postController.createPost
 )
 
+postRoutes.get('/index',
+    postController.index)
+
 module.exports = postRoutes;

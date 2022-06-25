@@ -28,6 +28,10 @@ const createPost = (req, res) => {
     return postService.createPost(req, res)
 }
 
+const index = (req, res) => {
+    return postService.index(req, res)
+}
+
 const postController = {
     getAllCategories,
     getAllPost,
@@ -35,7 +39,8 @@ const postController = {
     getPostByCategory,
     updatePost,
     deletePost,
-    createPost
+    createPost,
+    index
 }
 
 module.exports = postController

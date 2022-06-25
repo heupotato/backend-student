@@ -14,6 +14,10 @@ const CategorySchema = new Schema(
             type: String,
             required: true
         },
+        order: {
+            type: Number,
+            required: true
+        },
         post: [
             {
                 type: Schema.Types.ObjectId,
@@ -28,7 +32,8 @@ const CategorySchema = new Schema(
                 delete ret.id;
                 delete ret.deleted;
                 delete ret.deletedAt;
-                delete ret.updatedAt
+                delete ret.updatedAt; 
+                delete ret.order
             },
             virtuals: true,
         }
