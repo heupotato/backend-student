@@ -33,6 +33,10 @@ const PostSchema = new Schema(
         img_url: {
             type: String
         },
+        id_category: {
+            type: Schema.Types.ObjectId,
+            ref: 'post_category'
+        }
 
     },
     {
@@ -42,7 +46,6 @@ const PostSchema = new Schema(
                 delete ret.id
                 delete ret.deleted;
                 delete ret.deletedAt;
-                delete ret.lastUpdatedAt
             },
             virtuals: true,
         }

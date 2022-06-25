@@ -4,16 +4,25 @@ const handleError = require('../general/Error')
 const ERROR = require('../constants/error')
 const SUCCEED = require('../constants/succeed')
 
+const ObjectId = require('mongoose').Types.ObjectId;
+
 const getAllCategories = async (req, res) => {
-    const categoryList = await Category.find().populate([
-        {
-            path: 'post',
-            populate: {
-                path: 'id_user',
-                select: '_id full_name url_avatar'
+    const categoryList = await Category.find()
+        .populate([
+            {
+                path: 'post',
+                populate: {
+                    path: 'id_user',
+                    select: '_id full_name url_avatar'
+                },
+                match: {
+                    isDeleted: false
+                }
             }
-        }
-    ])
+        ])
+        .sort({
+            order: 1
+        })
     if (!categoryList) {
         const err = {
             code: 400,
@@ -25,7 +34,7 @@ const getAllCategories = async (req, res) => {
 
     return res.json({
         msg: SUCCEED.GET_CATEGORYLIST_SUCCESS,
-        data: categoryList, 
+        data: categoryList,
         res: 1
     })
 }
@@ -42,7 +51,7 @@ const getAllPost = async (req, res) => {
 
     return res.json({
         msg: 'success',
-        data: postList, 
+        data: postList,
         res: 1
     })
 }
@@ -56,24 +65,24 @@ const getOnePost = async (req, res) => {
     if (!post) {
         const err = {
             code: 400,
-            message: ERROR.POST_NOT_FOUND, 
+            message: ERROR.POST_NOT_FOUND,
             res: 0
         }
         return handleError(res, err)
     }
     return res.json({
         msg: SUCCEED.GET_POST_SUCCESS,
-        data: post, 
+        data: post,
         res: 1
     })
 }
 
 const getPostByCategory = async (req, res) => {
     const { id } = req.params
-    const postList = await Post.find({ id_category: id })
+    const postList = await Post.find({ id_category: id, isDeleted: false }).populate('id_user', 'full_name')
     return res.json({
         msg: SUCCEED.GET_POST_SUCCESS,
-        data: postList, 
+        data: postList,
         res: 1
     })
 }
@@ -89,14 +98,14 @@ const updatePost = async (req, res) => {
         const newPost = await Post.findByIdAndUpdate(id, req.body, { new: true, })
         return res.json({
             msg: SUCCEED.UPDATE_POST_SUCCESS,
-            data: newPost, 
+            data: newPost,
             res: 1
         })
     }
     catch (error) {
         const err = {
             code: 400,
-            message: error.message, 
+            message: error.message,
             res: 0
         }
         return handleError(res, err)
@@ -123,7 +132,7 @@ const deletePost = async (req, res) => {
     catch (error) {
         const err = {
             code: 400,
-            message: error.message, 
+            message: error.message,
             res: 0
         }
         return handleError(res, err)
@@ -140,13 +149,57 @@ const createPost = async (req, res) => {
 
 }
 
+const index = async (req, res) => {
+    const annouceCategoryId = "6278e9e29bd772a459685450"
+    const announcementPostList = await Post.find({ id_category: annouceCategoryId, isDeleted: false })
+        .populate('id_user', 'full_name')
+        .limit(4)
+        .sort({ lastUpdatedAt: -1 })
+    const announcementLatest = announcementPostList.shift()
+
+    const justInArray = await Post.find({ isDeleted: false })
+        .populate('id_user', 'full_name')
+        .limit(6)
+        .sort({ lastUpdatedAt: -1 })
+    const justInLatest = justInArray.shift()
+
+    const listCate = await Category.find().sort({ order: 1 })
+    let listPostCategory = await Promise.all(
+        listCate.map(async function (category) {
+            const id = category.id
+            const listPosts = await Post.find({ id_category: id, isDeleted: false })
+                .populate('id_user', 'full_name')
+                .limit(4)
+                .sort({ lastUpdatedAt: -1 })
+            console.log(listPosts.length)
+            return {
+                category: category.category,
+                posts: listPosts
+            }
+        })
+    )
+    return res.json({
+        msg: SUCCEED.GET_POST_SUCCESS,
+        data: {
+            announcementPostList,
+            announcementLatest,
+            justIn: {
+                justInLatest,
+                justInArray
+            },
+            listPostCategory
+        },
+        res: 1
+    })
+}
+
 const validateUser = async (req) => {
     const { userId, id } = req.params
     const { id_user } = await Post.findById(id)
     if (id_user.toString() !== userId) {
         const err = {
             code: 405,
-            message: ERROR.NOT_ALLOW, 
+            message: ERROR.NOT_ALLOW,
             res: 0
         }
         return {
@@ -166,7 +219,8 @@ const postService = {
     getPostByCategory,
     updatePost,
     deletePost,
-    createPost
+    createPost,
+    index
 }
 
 module.exports = postService
