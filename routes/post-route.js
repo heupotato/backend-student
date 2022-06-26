@@ -25,7 +25,7 @@ postRoutes.get('/categories/:id/posts',
     postController.getPostByCategory
 )
 
-postRoutes.put('/user/:userId/posts/:id',
+postRoutes.put('/posts/:id',
     auth.authenticateToken,
     postController.updatePost
 )

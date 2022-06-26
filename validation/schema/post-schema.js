@@ -12,12 +12,9 @@ const postParamsSchema = Joi.object({
 });
 
 const newPostSchema = Joi.object({
-    id_user: Joi.objectId().required(),
     id_category: Joi.objectId().required(),
     title: Joi.string().required().max(300),
     content: Joi.string().required(),
-    createdAt: Joi.date().required(),
-    lastUpdatedAt: Joi.date().required()
 })
 
 const postSchema = {
