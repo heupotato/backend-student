@@ -13,8 +13,8 @@ const app = express();
 const port = 3000;
 
 app.use(cors({
-  origin:['http://localhost:3000'],
-  credentials:true
+  origin: ['http://localhost:3000'],
+  credentials: true
 }));
 
 app.use(function (req, res, next) {
@@ -62,7 +62,5 @@ const main = async () => {
     console.log(err, 'Fail to connect to DB');
   }
 }
-
-
 
 main()
