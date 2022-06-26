@@ -123,8 +123,9 @@ const updatePost = async (req, res) => {
     if (!validate.isValid)
         return handleError(res, validate.err)
 
+    const today = new Date()
     try {
-        const newPost = await Post.findByIdAndUpdate(id, req.body, { new: true, })
+        const newPost = await Post.findByIdAndUpdate(id, { ...req.body, lastUpdatedAt: today }, { new: true, })
         return res.json({
             msg: SUCCEED.UPDATE_POST_SUCCESS,
             data: newPost,
@@ -169,7 +170,8 @@ const deletePost = async (req, res) => {
 }
 
 const createPost = async (req, res) => {
-    const newPost = await Post.create(req.body)
+    const id_user = req.user.uid
+    const newPost = await Post.create({ ...req.body, id_user: id_user })
     return res.json({
         message: SUCCEED.CREATE_POST_SUCCESS,
         data: newPost,
@@ -180,7 +182,11 @@ const createPost = async (req, res) => {
 
 const index = async (req, res) => {
     const annouceCategoryId = "6278e9e29bd772a459685450"
-    const announcementPostList = await Post.find({ id_category: annouceCategoryId, isDeleted: false })
+    const announcementPostList = await Post
+        .find({
+            id_category: annouceCategoryId,
+            isDeleted: false
+        })
         .populate('id_user', 'full_name')
         .limit(4)
         .sort({ lastUpdatedAt: -1 })
@@ -193,6 +199,7 @@ const index = async (req, res) => {
     const justInLatest = justInArray.shift()
 
     const listCate = await Category.find().sort({ order: 1 })
+
     let listPostCategory = await Promise.all(
         listCate.map(async function (category) {
             const id = category.id
@@ -223,9 +230,10 @@ const index = async (req, res) => {
 }
 
 const validateUser = async (req) => {
-    const { userId, id } = req.params
+    const { id } = req.params
+    const { uid } = req.user
     const { id_user } = await Post.findById(id)
-    if (id_user.toString() !== userId) {
+    if (id_user.toString() !== uid) {
         const err = {
             code: 405,
             message: ERROR.NOT_ALLOW,

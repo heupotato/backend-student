@@ -3,22 +3,36 @@ const handleError = require('../general/Error')
 const ERROR = require('../constants/error')
 const SUCCEED = require('../constants/succeed')
 const User = require('../models/User')
+const Post = require('../models/Post')
 
 const getCommentByPostId = async (req, res) => {
     const { id } = req.params
     const commentList = await Comment.find({ id_post: id, isDeleted: false })
     return res.json({
         msg: SUCCEED.GET_COMMENT_SUCCESS,
-        data: commentList, 
+        data: commentList,
         res: 1
     })
 }
 
 const postComment = async (req, res) => {
-    const newComment = await Comment.create(req.body)
+    const { uid } = req.user
+    const { id_post } = req.body
+    console.log(id_post)
+    const newComment = await Comment.create({ ...req.body, id_user: uid })
+    try {
+        await Post.findByIdAndUpdate(id_post,
+            {
+                "$push": { "comment_ids": newComment.id },
+                "$inc": { "comment_length": 1 }
+            })
+    }
+    catch (err) {
+        console.log(err)
+    }
     return res.json({
         msg: SUCCEED.CREATE_COMMENT_SUCCESS,
-        data: newComment, 
+        data: newComment,
         res: 1
     })
 

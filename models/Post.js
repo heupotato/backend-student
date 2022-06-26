@@ -12,11 +12,13 @@ const PostSchema = new Schema(
         },
         createdAt: {
             type: Date,
-            required: true
+            required: true,
+            default: () => new Date()
         },
         lastUpdatedAt: {
             type: Date,
-            required: true
+            required: true,
+            default: () => new Date()
         },
         title: {
             type: String,
@@ -45,7 +47,8 @@ const PostSchema = new Schema(
         ],
         comment_length: {
             type: Number,
-            required: true
+            required: true,
+            default: 0
 
         }
 

@@ -16,7 +16,8 @@ const commentSchema = new Schema(
         },
         createdAt: {
             type: Date,
-            required: true
+            required: true,
+            default: () => new Date()
         },
         isDeleted: {
             type: Boolean,
