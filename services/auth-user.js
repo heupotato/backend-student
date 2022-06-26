@@ -5,6 +5,8 @@ const User = require('../models/User')
 const handleError = require('../general/Error')
 const ERROR = require('../constants/error')
 const SUCCEED = require('../constants/succeed')
+const fileUploadService = require('../utils/FileUpload')
+const path = require('path')
 
 const login = async (req, res) => {
     const { username, password } = req.body;
@@ -21,7 +23,7 @@ const login = async (req, res) => {
     if (!correctPassword) {
         const err = {
             code: 400,
-            message: ERROR.INCORRECT_PASSWORD, 
+            message: ERROR.INCORRECT_PASSWORD,
             res: 0
         }
         return handleError(res, err)
@@ -29,7 +31,7 @@ const login = async (req, res) => {
     if (user.isBlocked === true) {
         const err = {
             code: 405,
-            message: ERROR.NOT_ALLOW, 
+            message: ERROR.NOT_ALLOW,
             res: 0
         }
         return handleError(res, err)
@@ -37,17 +39,18 @@ const login = async (req, res) => {
     const token = await JWT.generateToken({ uid: user._id, role: user.role })
     return res.json({
         msg: SUCCEED.LOGIN_SUCCEED,
-        token, 
+        token,
         res: 1
     })
 }
 
 const register = async (req, res) => {
+
     const { username, password } = req.body;
     if (await User.exists({ username: username })) {
         const err = {
             code: 400,
-            message: ERROR.USERNAME_ALREADY_EXIST, 
+            message: ERROR.USERNAME_ALREADY_EXIST,
             res: 0
         }
         return handleError(res, err)
@@ -56,6 +59,26 @@ const register = async (req, res) => {
     req.body = { ...req.body, role: 'user' }
     const user = await User.create(req.body)
     const token = await JWT.generateToken({ uid: user._id, role: user.role })
+    const filename = user.id.toString() + '_avatar' + path.extname(req.file.originalname)
+    try {
+        fileUploadService.upload(req.file, filename)
+
+    }
+    catch (error) {
+        await User.findByIdAndDelete(user.id)
+        const err = {
+            code: 400,
+            message: error,
+            res: 0
+        }
+        return handleError(res, err)
+    }
+
+    const url = fileUploadService.bucketUrl + filename
+    console.log(url)
+    await User.findByIdAndUpdate(user.id, { url_avatar: url })
+
+
     return res.json({
         message: SUCCEED.REGISTER_SUCCESS,
         token,

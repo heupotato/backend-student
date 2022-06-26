@@ -42,9 +42,10 @@ const UserSchema = new Schema(
         {
             type: String,
         },
-        urlAvatar:
+        url_avatar:
         {
-            type: String
+            type: String,
+            default: ''
         }
     },
     {
