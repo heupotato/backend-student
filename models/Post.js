@@ -36,6 +36,17 @@ const PostSchema = new Schema(
         id_category: {
             type: Schema.Types.ObjectId,
             ref: 'post_category'
+        },
+        comment_ids: [
+            {
+                type: Schema.Types.ObjectId,
+                ref: 'post_comment'
+            }
+        ],
+        comment_length: {
+            type: Number,
+            required: true
+
         }
 
     },

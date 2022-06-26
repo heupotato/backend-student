@@ -3,6 +3,7 @@ const Category = require('../models/Category')
 const handleError = require('../general/Error')
 const ERROR = require('../constants/error')
 const SUCCEED = require('../constants/succeed')
+const { populate } = require('../models/Post')
 
 const ObjectId = require('mongoose').Types.ObjectId;
 
@@ -58,10 +59,26 @@ const getAllPost = async (req, res) => {
 
 const getOnePost = async (req, res) => {
     const { id } = req.params
-    const post = await Post.findOne({ _id: id, isDeleted: false }).populate({
-        path: 'id_user',
-        select: 'full_name url_avatar'
-    })
+    const post = await Post.findOne({ _id: id, isDeleted: false }).populate([
+        {
+            path: 'id_user',
+            select: 'full_name url_avatar'
+        },
+        {
+            path: 'comment_ids',
+            select: 'id_user createdAt content',
+            populate: {
+                path: 'id_user',
+                select: 'full_name url_avatar'
+            },
+            match: { isDeleted: false },
+            options: {
+                sort: {
+                    createdAt: -1
+                }
+            }
+        }
+    ])
     if (!post) {
         const err = {
             code: 400,
@@ -70,9 +87,17 @@ const getOnePost = async (req, res) => {
         }
         return handleError(res, err)
     }
+
+    const popularPosts = await getPopularPosts([id])
+
+    const relatedPosts = await getRelatedPosts(id, post.id_category)
     return res.json({
         msg: SUCCEED.GET_POST_SUCCESS,
-        data: post,
+        data: {
+            post,
+            popularPosts,
+            relatedPosts
+        },
         res: 1
     })
 }
@@ -80,9 +105,13 @@ const getOnePost = async (req, res) => {
 const getPostByCategory = async (req, res) => {
     const { id } = req.params
     const postList = await Post.find({ id_category: id, isDeleted: false }).populate('id_user', 'full_name')
+    const popularPosts = await getPopularPosts()
     return res.json({
         msg: SUCCEED.GET_POST_SUCCESS,
-        data: postList,
+        data: {
+            postList,
+            popularPosts
+        },
         res: 1
     })
 }
@@ -212,6 +241,36 @@ const validateUser = async (req) => {
     }
 }
 
+const getPopularPosts = async (idPosts) => {
+    const popularPosts = await Post
+        .find({
+            id: {
+                $ni: idPosts
+            },
+            isDeleted: false
+        })
+        .sort({ comment_length: -1 })
+        .limit(5)
+        .populate('id_user', 'full_name url_avatar')
+
+    return popularPosts
+}
+
+const getRelatedPosts = async (idPost, idCate) => {
+    const relatedPosts = await Post
+        .find({
+            id: {
+                $ne: idPost
+            },
+            isDeleted: false,
+            id_category: idCate
+        })
+        .sort({ createdAt: -1 })
+        .limit(3)
+        .populate('id_user', 'full_name url_avatar')
+
+    return relatedPosts
+}
 const postService = {
     getAllCategories,
     getAllPost,
