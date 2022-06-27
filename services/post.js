@@ -43,14 +43,18 @@ const getAllCategories = async (req, res) => {
 }
 
 const getAllPost = async (req, res) => {
-    const postList = await Post.find({ isDeleted: false });
-    if (!postList) {
-        const err = {
-            code: 400,
-            message: 'error'
-        }
-        return handleError(res, err)
-    }
+    const filter = req.query.filter || ""
+
+    const postList = await Post
+        .find({
+            isDeleted: false,
+            title: {
+                "$regex": filter,
+                "$options": "i"
+            }
+        })
+        .sort({ createdAt: -1 })
+        .populate('id_user', 'full_name url_avatar')
 
     return res.json({
         msg: 'success',
@@ -106,21 +110,53 @@ const getOnePost = async (req, res) => {
 
 const getPostByCategory = async (req, res) => {
     const { id } = req.params
-    const postList = await Post.find({ id_category: id, isDeleted: false }).populate('id_user', 'full_name')
+    const { category } = await Category.findById(id)
+
+    const perPage = 5
+    const page = req.query.page || 1
+
     const popularPosts = await getPopularPosts()
-    return res.json({
-        msg: SUCCEED.GET_POST_SUCCESS,
-        data: {
-            postList,
-            popularPosts
-        },
-        res: 1
-    })
+
+    await Post
+        .find({ id_category: id, isDeleted: false })
+        .populate('id_user', 'full_name')
+        .skip((perPage * page) - perPage)
+        .limit(perPage)
+        .sort({ createdAt: -1 })
+        .exec((error, posts) => {
+            Post.countDocuments((error, count) => {
+                if (error) {
+                    const err = {
+                        code: 400,
+                        message: error,
+                        res: 0
+                    }
+                    return handleError(res, err)
+                }
+
+                return res.json({
+                    msg: SUCCEED.GET_POST_SUCCESS,
+                    data: {
+                        category,
+                        posts,
+                        popularPosts,
+                        current: page,
+                        totalPages: Math.ceil(count / perPage)
+                    },
+                    res: 1
+                })
+
+            });
+        });
+
+
+
 }
 
 const updatePost = async (req, res) => {
     const { id } = req.params
     const validate = await validateUser(req)
+    const { img_url } = await Post.findById(id)
 
     if (!validate.isValid)
         return handleError(res, validate.err)
@@ -128,10 +164,9 @@ const updatePost = async (req, res) => {
     const file = req.file
     if (file) {
         const filename = id.toString() + '_news' + path.extname(file.originalname)
-        console.log(filename)
+        const oldFilename = img_url.replace(fileUploadService.bucketUrl, '')
         try {
-            console.log("deleting")
-            await fileUploadService.deleteFile(filename)
+            await fileUploadService.deleteFile(oldFilename)
             await fileUploadService.upload(file, filename)
         }
         catch (error) {
