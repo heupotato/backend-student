@@ -56,40 +56,32 @@ const register = async (req, res) => {
         return handleError(res, err)
     }
 
-    const file = req.file
-    if (!file) {
-        const err = {
-            code: 400,
-            message: ERROR.NO_FILE_UPLOAD,
-            res: 0
-        }
-        return handleError(res, err)
-    }
-
     req.body.password = await Bcrypt.hash(password);
     req.body = { ...req.body, role: 'user' }
     const user = await User.create(req.body)
     const token = await JWT.generateToken({ uid: user._id, role: user.role })
 
-    const filename = user.id.toString() + '_avatar' + path.extname(file.originalname)
-    try {
-        await fileUploadService.upload(file, filename)
+    const file = req.file
+    if (file) {
+        const filename = user.id.toString() + '_avatar' + path.extname(file.originalname)
+        try {
+            await fileUploadService.upload(file, filename)
 
-    }
-    catch (error) {
-        await User.findByIdAndDelete(user.id)
-        const err = {
-            code: 400,
-            message: error,
-            res: 0
         }
-        return handleError(res, err)
+        catch (error) {
+            await User.findByIdAndDelete(user.id)
+            const err = {
+                code: 400,
+                message: error,
+                res: 0
+            }
+            return handleError(res, err)
+        }
+
+        const url = fileUploadService.bucketUrl + filename
+        console.log(url)
+        await User.findByIdAndUpdate(user.id, { url_avatar: url })
     }
-
-    const url = fileUploadService.bucketUrl + filename
-    console.log(url)
-    await User.findByIdAndUpdate(user.id, { url_avatar: url })
-
 
     return res.json({
         message: SUCCEED.REGISTER_SUCCESS,

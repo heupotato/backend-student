@@ -7,6 +7,10 @@ const auth = require('../middleware/authenticator')
 const paramsValidate = require('../validation/params-validate')
 const postValidate = require('../validation/post-validate')
 
+const multer = require('multer')
+
+const upload = multer()
+
 postRoutes.get('/categories',
     postController.getAllCategories
 );
@@ -35,7 +39,7 @@ postRoutes.delete('/user/:userId/posts/:id',
     postController.deletePost
 )
 
-postRoutes.post('/posts',
+postRoutes.post('/posts', upload.single('img'),
     auth.authenticateToken,
     auth.checkManagerRoles,
     postValidate.createPostValidate,
