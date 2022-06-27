@@ -20,7 +20,10 @@ const error = {
     //FORUM-TOPIC
     TOPIC_LIST_NOT_EXIST: 'CANNOT OBTAIN LIST TOPIC',
 
-    BAD_REQUEST: 'BAD_REQUEST'
+    BAD_REQUEST: 'BAD_REQUEST',
+
+    //FILE 
+    NO_FILE_UPLOAD: 'NO_FILE_UPLOAD'
 }
 
 module.exports = error
