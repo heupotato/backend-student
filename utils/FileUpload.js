@@ -26,9 +26,6 @@ const upload = async (file, filename) => {
             console.log("succeeded")
         }
     });
-
-
-    return res
 }
 
 const fileUploadService = {

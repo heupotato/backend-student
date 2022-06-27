@@ -55,13 +55,25 @@ const register = async (req, res) => {
         }
         return handleError(res, err)
     }
+
+    const file = req.file
+    if (!file) {
+        const err = {
+            code: 400,
+            message: ERROR.NO_FILE_UPLOAD,
+            res: 0
+        }
+        return handleError(res, err)
+    }
+
     req.body.password = await Bcrypt.hash(password);
     req.body = { ...req.body, role: 'user' }
     const user = await User.create(req.body)
     const token = await JWT.generateToken({ uid: user._id, role: user.role })
-    const filename = user.id.toString() + '_avatar' + path.extname(req.file.originalname)
+
+    const filename = user.id.toString() + '_avatar' + path.extname(file.originalname)
     try {
-        fileUploadService.upload(req.file, filename)
+        fileUploadService.upload(file, filename)
 
     }
     catch (error) {
