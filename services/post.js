@@ -4,6 +4,8 @@ const handleError = require('../general/Error')
 const ERROR = require('../constants/error')
 const SUCCEED = require('../constants/succeed')
 const { populate } = require('../models/Post')
+const path = require('path')
+const fileUploadService = require('../utils/FileUpload')
 
 const ObjectId = require('mongoose').Types.ObjectId;
 
@@ -171,7 +173,30 @@ const deletePost = async (req, res) => {
 
 const createPost = async (req, res) => {
     const id_user = req.user.uid
-    const newPost = await Post.create({ ...req.body, id_user: id_user })
+    var newPost = await Post.create({ ...req.body, id_user: id_user })
+
+    const file = req.file
+    if (file) {
+        const filename = newPost.id.toString() + '_news' + path.extname(file.originalname)
+        try {
+            await fileUploadService.upload(file, filename)
+
+        }
+        catch (error) {
+            await Post.findByIdAndDelete(newPost.id)
+            const err = {
+                code: 400,
+                message: error,
+                res: 0
+            }
+            return handleError(res, err)
+        }
+
+        const url = fileUploadService.bucketUrl + filename
+        console.log(url)
+        newPost = await Post.findByIdAndUpdate(newPost.id, { img_url: url }, { new: true })
+    }
+
     return res.json({
         message: SUCCEED.CREATE_POST_SUCCESS,
         data: newPost,
