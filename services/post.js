@@ -125,8 +125,32 @@ const updatePost = async (req, res) => {
     if (!validate.isValid)
         return handleError(res, validate.err)
 
+    const file = req.file
+    if (file) {
+        const filename = id.toString() + '_news' + path.extname(file.originalname)
+        console.log(filename)
+        try {
+            console.log("deleting")
+            await fileUploadService.deleteFile(filename)
+            await fileUploadService.upload(file, filename)
+        }
+        catch (error) {
+            const err = {
+                code: 400,
+                message: error,
+                res: 0
+            }
+            return handleError(res, err)
+        }
+
+        const url = fileUploadService.bucketUrl + filename
+        console.log(url)
+        newPost = await Post.findByIdAndUpdate(id, { img_url: url }, { new: true })
+    }
+
     const today = new Date()
     try {
+        console.log("updating")
         const newPost = await Post.findByIdAndUpdate(id, { ...req.body, lastUpdatedAt: today }, { new: true, })
         return res.json({
             msg: SUCCEED.UPDATE_POST_SUCCESS,
@@ -134,6 +158,8 @@ const updatePost = async (req, res) => {
             res: 1
         })
     }
+
+
     catch (error) {
         const err = {
             code: 400,
@@ -256,19 +282,21 @@ const index = async (req, res) => {
 
 const validateUser = async (req) => {
     const { id } = req.params
-    const { uid } = req.user
+    const { uid, role } = req.user
     const { id_user } = await Post.findById(id)
-    if (id_user.toString() !== uid) {
-        const err = {
-            code: 405,
-            message: ERROR.NOT_ALLOW,
-            res: 0
+
+    if (role !== 'admin')
+        if (id_user.toString() !== uid) {
+            const err = {
+                code: 405,
+                message: ERROR.NOT_ALLOW,
+                res: 0
+            }
+            return {
+                isValid: false,
+                err: err
+            }
         }
-        return {
-            isValid: false,
-            err: err
-        }
-    }
     return {
         isValid: true
     }

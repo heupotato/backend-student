@@ -8,7 +8,8 @@ const bucketUrl = "https://student-channel-img.s3.ap-southeast-1.amazonaws.com/"
 const upload = async (file, filename) => {
     AWS.config.update({
         accessKeyId: accessKeyId,
-        secretAccessKey: secretAccessKey
+        secretAccessKey: secretAccessKey,
+        region: 'ap-southeast-1'
     });
 
     var s3 = new AWS.S3();
@@ -33,9 +34,34 @@ const upload = async (file, filename) => {
     }
 }
 
+const deleteFile = async (filename) => {
+    AWS.config.update({
+        accessKeyId: accessKeyId,
+        secretAccessKey: secretAccessKey,
+        region: 'ap-southeast-1'
+    });
+
+    var s3 = new AWS.S3();
+
+    var params = {
+        Bucket: 'student-channel-img',
+        Key: filename
+    };
+
+    try {
+        await s3.deleteObject(params, (err) => {
+            if (err) {
+                throw err;
+            } else console.log("deleted")
+        }).promise();
+    }
+    catch (error) { error }
+}
+
 const fileUploadService = {
     upload,
-    bucketUrl
+    bucketUrl,
+    deleteFile
 }
 
 module.exports = fileUploadService
