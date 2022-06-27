@@ -29,12 +29,12 @@ postRoutes.get('/categories/:id/posts',
     postController.getPostByCategory
 )
 
-postRoutes.put('/posts/:id',
+postRoutes.put('/posts/:id', upload.single('img'),
     auth.authenticateToken,
     postController.updatePost
 )
 
-postRoutes.delete('/user/:userId/posts/:id',
+postRoutes.delete('/posts/:id',
     auth.authenticateToken,
     postController.deletePost
 )
