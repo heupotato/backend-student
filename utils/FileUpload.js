@@ -20,7 +20,7 @@ const upload = async (file, filename) => {
     };
 
     try {
-        s3.putObject(params, function (perr, pres) {
+        await s3.putObject(params, function (perr, pres) {
             if (perr) {
                 throw (perr)
             } else {
