@@ -73,7 +73,7 @@ const register = async (req, res) => {
 
     const filename = user.id.toString() + '_avatar' + path.extname(file.originalname)
     try {
-        fileUploadService.upload(file, filename)
+        await fileUploadService.upload(file, filename)
 
     }
     catch (error) {

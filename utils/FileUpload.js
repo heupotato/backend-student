@@ -19,13 +19,18 @@ const upload = async (file, filename) => {
         Body: file.buffer
     };
 
-    await s3.putObject(params, function (perr, pres) {
-        if (perr) {
-            throw (perr)
-        } else {
-            console.log("succeeded")
-        }
-    });
+    try {
+        s3.putObject(params, function (perr, pres) {
+            if (perr) {
+                throw (perr)
+            } else {
+                console.log("succeeded")
+            }
+        }).promise;
+    }
+    catch (err) {
+        throw err
+    }
 }
 
 const fileUploadService = {
