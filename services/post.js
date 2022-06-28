@@ -45,7 +45,10 @@ const getAllCategories = async (req, res) => {
 const getAllPost = async (req, res) => {
     const filter = req.query.filter || ""
 
-    const postList = await Post
+    const perPage = 8
+    const page = req.query.page || 1
+
+    await Post
         .find({
             isDeleted: false,
             title: {
@@ -55,12 +58,37 @@ const getAllPost = async (req, res) => {
         })
         .sort({ createdAt: -1 })
         .populate('id_user', 'full_name url_avatar')
+        .skip((perPage * page) - perPage)
+        .limit(perPage)
+        .exec((error, posts) => {
+            Post.countDocuments({
+                isDeleted: false,
+                title: {
+                    "$regex": filter,
+                    "$options": "i"
+                }
+            }, (error, count) => {
+                if (error) {
+                    const err = {
+                        code: 400,
+                        message: error,
+                        res: 0
+                    }
+                    return handleError(res, err)
+                }
 
-    return res.json({
-        msg: 'success',
-        data: postList,
-        res: 1
-    })
+                return res.json({
+                    msg: SUCCEED.GET_POST_SUCCESS,
+                    data: {
+                        posts,
+                        current: page,
+                        totalPages: Math.ceil(count / perPage)
+                    },
+                    res: 1
+                })
+
+            });
+        });
 }
 
 const getOnePost = async (req, res) => {
