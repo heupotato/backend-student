@@ -58,6 +58,7 @@ const ForumPostSchema = new Schema(
                 delete ret.deleted;
                 delete ret.deletedAt;
                 delete ret.lastUpdatedAt
+                delete ret.__V
             },
             virtuals: true,
         }
