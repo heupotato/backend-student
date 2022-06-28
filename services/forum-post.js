@@ -55,23 +55,81 @@ const getAllThreads = async (req, res) => {
 
 const getAllTopicsByThreadId = async (req, res) => {
     const { id } = req.params
-    const topicList = await Topic.find({ id_thread: id, isDeleted: false })
-        .populate({
-            path: 'post_ids',
-            populate: {
-                path: 'id_user',
-                select: 'full_name url_avatar'
-            }
-        })
-        .sort({
-            createdAt: 1
-        })
+    const perPage = 6
+    const page = req.query.page || 1
 
-    return res.json({
-        msg: SUCCEED.GET_TOPICLIST_SUCCESS,
-        data: topicList,
-        res: 1
-    })
+    try {
+        const totalTopicsInThread = await Topic.countDocuments({ isDeleted: false, id_thread: id })
+        const { topic_ids, thread } = await Thread.findById(id)
+        const postNum = await ForumPost.countDocuments({ isDeleted: false, id_topic: { $in: topic_ids } })
+        let topicList = await Topic.find({ id_thread: id, isDeleted: false })
+            .sort({
+                createdAt: -1
+            })
+            .skip((perPage * page) - perPage)
+            .limit(perPage)
+
+        const currentTopicNum = topicList.length
+        const start = (perPage * page) - perPage + 1
+        const end = start + currentTopicNum - 1
+
+        topicList = await Promise.all(
+            topicList.map(async topic => {
+                const topicName = topic.topic
+                const totalPosts = topic.post_ids.length
+                const postIds = topic.post_ids
+                const totalComments = await ForumComment.countDocuments({ isDeleted: false, id_post: { $in: postIds } })
+
+                const latestPost = await ForumPost
+                    .findOne({ id_topic: topic.id, isDeleted: false })
+                    .sort({ createdAt: -1 })
+                    .populate('id_user', 'full_name')
+                const oldestPost = await ForumPost
+                    .findOne({ id_topic: topic.id, isDeleted: false })
+                    .sort({ createdAt: 1 })
+                    .populate('id_user', 'full_name')
+                let author = "N/A"
+                let date = "N/A"
+
+                const startedAuthor = oldestPost ? oldestPost.id_user.full_name : "N/A"
+                if (latestPost) {
+                    author = latestPost.id_user.full_name
+                    date = latestPost.createdAt
+                }
+
+                return {
+                    totalPosts,
+                    totalComments,
+                    author,
+                    date,
+                    startedAuthor,
+                    topicName
+                }
+            })
+        )
+        return res.json({
+            msg: SUCCEED.GET_TOPICLIST_SUCCESS,
+            data: {
+                thread,
+                totalTopicsInThread,
+                postNum,
+                currentTopicNum,
+                current: page,
+                start,
+                end,
+                topicList
+            },
+            res: 1
+        })
+    }
+    catch (error) {
+        const err = {
+            code: 400,
+            message: error.message,
+            res: 0
+        }
+        return handleError(res, err)
+    }
 }
 
 const getAllPostsByTopicId = async (req, res) => {

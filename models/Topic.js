@@ -34,6 +34,7 @@ const TopicSchema = new Schema(
                 delete ret.deleted;
                 delete ret.deletedAt;
                 delete ret.updatedAt
+                delete ret.__v
             },
             virtuals: true,
         }
