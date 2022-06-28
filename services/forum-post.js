@@ -1,6 +1,7 @@
 const Thread = require('../models/Thread')
 const Topic = require('../models/Topic')
 const ForumPost = require('../models/ForumPost')
+const ForumComment = require('../models/ForumComment')
 
 const handleError = require('../general/Error')
 const ERROR = require('../constants/error')
@@ -10,13 +11,46 @@ const validateRole = require('./validate-role')
 
 
 const getAllThreads = async (req, res) => {
-    const threadList = await Thread.find().populate('topic_ids')
+    try {
+        const totalPosts = await ForumPost.countDocuments({ isDeleted: false })
+        const totalTopics = await Topic.countDocuments({ isDeleted: false })
+        const totalComments = await ForumComment.countDocuments({ isDeleted: false })
+        const latestPost = await getLatestPost()
+        let threadList = await Thread.find()
+        threadList = await Promise.all(
+            threadList.map(async thread => {
+                const threadData = thread._doc
+                const topicNum = threadData.topic_ids.length
+                const topicIdList = threadData.topic_ids
+                const postNum = await ForumPost.countDocuments({ isDeleted: false, id_topic: { $in: topicIdList } })
+                return {
+                    ...threadData,
+                    topicNum,
+                    postNum
+                }
+            })
+        )
 
-    return res.json({
-        msg: SUCCEED.GET_THREADLIST_SUCCESS,
-        data: threadList,
-        res: 1
-    })
+        return res.json({
+            msg: SUCCEED.GET_THREADLIST_SUCCESS,
+            data: {
+                totalPosts,
+                totalTopics,
+                totalComments,
+                threadList,
+                latestPost
+            },
+            res: 1
+        })
+    }
+    catch (error) {
+        const err = {
+            code: 400,
+            message: error.message,
+            res: 0
+        }
+        return handleError(res, err)
+    }
 }
 
 const getAllTopicsByThreadId = async (req, res) => {
@@ -230,6 +264,14 @@ const deletePost = async (req, res) => {
 
 }
 
+const getLatestPost = async () => {
+    const latestPost = await ForumPost
+        .find({ isDeleted: false })
+        .sort({ createdAt: -1 })
+        .limit(4)
+        .populate('id_user', 'full_name')
+    return latestPost
+}
 const forumPostService = {
     getAllThreads,
     getAllTopicsByThreadId,
