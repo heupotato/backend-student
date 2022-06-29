@@ -152,7 +152,7 @@ const getPostByCategory = async (req, res) => {
         .limit(perPage)
         .sort({ createdAt: -1 })
         .exec((error, posts) => {
-            Post.countDocuments((error, count) => {
+            Post.countDocuments({ isDeleted: false, id_category: id }, (error, count) => {
                 if (error) {
                     const err = {
                         code: 400,

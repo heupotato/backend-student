@@ -2,6 +2,7 @@ const Thread = require('../models/Thread')
 const Topic = require('../models/Topic')
 const ForumPost = require('../models/ForumPost')
 const ForumComment = require('../models/ForumComment')
+const ForumReact = require('../models/ForumReact')
 
 const handleError = require('../general/Error')
 const ERROR = require('../constants/error')
@@ -134,24 +135,68 @@ const getAllTopicsByThreadId = async (req, res) => {
 
 const getAllPostsByTopicId = async (req, res) => {
     const { id } = req.params
-    const postList = await ForumPost.find({ id_topic: id, isDeleted: false })
-        .populate(
-            [
-                {
-                    path: 'id_user',
-                    select: 'full_name url_avatar'
-                }
-            ]
-        )
-        .sort({
-            createdAt: -1
-        })
+    const perPage = 4
+    const page = req.query.page || 1
+    try {
+        const { topic } = await Topic.findById(id)
+        const totalPosts = await ForumPost.countDocuments({ id_topic: id, isDeleted: false })
+        let postList = await ForumPost.find({ id_topic: id, isDeleted: false })
+            .populate(
+                [
+                    {
+                        path: 'id_user',
+                        select: 'full_name url_avatar'
+                    },
+                    {
+                        path: 'comment_ids',
+                        populate: {
+                            path: 'id_user',
+                            select: 'full_name url_avatar'
+                        }
+                    }
+                ]
+            )
+            .sort({
+                createdAt: -1
+            })
+            .skip((perPage * page) - perPage)
+            .limit(perPage)
 
-    return res.json({
-        msg: SUCCEED.GET_POST_SUCCESS,
-        data: postList,
-        res: 1
-    })
+        postList = await Promise.all(
+            postList.map(async post => {
+                const reactNum = await getReactsNum(post.id)
+                return {
+                    post,
+                    reactNum
+                }
+            })
+        )
+
+        const threadList = await getThreadList()
+
+        const recentTopic = await getRecentTopic()
+
+        return res.json({
+            msg: SUCCEED.GET_POST_SUCCESS,
+            data: {
+                topic,
+                current: page,
+                totalPages: Math.ceil(totalPosts / perPage),
+                postList,
+                thread: threadList,
+                recentTopic
+            },
+            res: 1
+        })
+    }
+    catch (error) {
+        const err = {
+            code: 400,
+            message: error.message,
+            res: 0
+        }
+        return handleError(res, err)
+    }
 
 }
 
@@ -330,6 +375,43 @@ const getLatestPost = async () => {
         .populate('id_user', 'full_name')
     return latestPost
 }
+
+const getReactsNum = async (id) => {
+    const dislike = await ForumReact.countDocuments({ isDeleted: false, id_post: id, type: 'Dislike' })
+    const like = await ForumReact.countDocuments({ isDeleted: false, id_post: id, type: 'Like' })
+    return {
+        dislike,
+        like
+    }
+}
+
+const getThreadList = async () => {
+    let threadList = await Thread.find()
+    threadList = await Promise.all(
+        threadList.map(async thread => {
+            const threadName = thread.thread
+            const topicNum = thread.topic_ids.length
+            const topicIdList = thread.topic_ids
+            const postNum = await ForumPost.countDocuments({ isDeleted: false, id_topic: { $in: topicIdList } })
+            return {
+                threadName,
+                topicNum,
+                postNum
+            }
+        })
+    )
+    return threadList
+}
+
+const getRecentTopic = async () => {
+    const recentTopic = await Topic
+        .find({ isDeleted: false })
+        .sort({ createdAt: -1 })
+        .select('topic createdAt')
+        .limit(5)
+    return recentTopic
+}
+
 const forumPostService = {
     getAllThreads,
     getAllTopicsByThreadId,

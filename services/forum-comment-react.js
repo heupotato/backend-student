@@ -93,7 +93,7 @@ const updateComment = async (req, res) => {
     catch (error) {
         const err = {
             code: 400,
-            message: error.message, 
+            message: error.message,
             res: 0
         }
         return handleError(res, err)
@@ -114,7 +114,7 @@ const createReact = async (req, res) => {
             newReact = await ForumReact.create({ id_post: id, id_user: uid, type: type })
             await ForumPost.findByIdAndUpdate(id,
                 {
-                    '$addToSet': { 'comment_ids': newReact._id }
+                    '$addToSet': { 'react_ids': newReact._id }
                 }
             )
         }
@@ -122,7 +122,7 @@ const createReact = async (req, res) => {
 
         return res.json({
             msg: SUCCEED.CREATE_REACT_SUCCESS,
-            data: newReact, 
+            data: newReact,
             res: 1
         })
     }
@@ -154,7 +154,7 @@ const deleteReact = async (req, res) => {
     catch (error) {
         const err = {
             code: 400,
-            message: error.message, 
+            message: error.message,
             res: 1
         }
         return handleError(res, err)
