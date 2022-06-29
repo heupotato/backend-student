@@ -24,7 +24,12 @@ const TopicSchema = new Schema(
             type: Boolean,
             required: true,
             default: false
-        }
+        },
+        createdAt: {
+            type: Date,
+            required: true,
+            default: () => new Date()
+        },
     },
     {
         collection: 'topic',

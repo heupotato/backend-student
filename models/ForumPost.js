@@ -16,11 +16,13 @@ const ForumPostSchema = new Schema(
         },
         createdAt: {
             type: Date,
-            required: true
+            required: true,
+            default: () => new Date()
         },
         lastUpdatedAt: {
             type: Date,
-            required: true
+            required: true,
+            default: () => new Date()
         },
         title: {
             type: String,
@@ -57,7 +59,6 @@ const ForumPostSchema = new Schema(
                 delete ret.id
                 delete ret.deleted;
                 delete ret.deletedAt;
-                delete ret.lastUpdatedAt
                 delete ret.__V
             },
             virtuals: true,
