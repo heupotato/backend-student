@@ -183,36 +183,48 @@ const getPostByCategory = async (req, res) => {
 
 const updatePost = async (req, res) => {
     const { id } = req.params
-    const validate = await validateUser(req)
-    const { img_url } = await Post.findById(id)
 
-    if (!validate.isValid)
-        return handleError(res, validate.err)
-
-    const file = req.file
-    if (file) {
-        const filename = id.toString() + '_news' + path.extname(file.originalname)
-        const oldFilename = img_url.replace(fileUploadService.bucketUrl, '')
-        try {
-            await fileUploadService.deleteFile(oldFilename)
-            await fileUploadService.upload(file, filename)
+    const post = await Post.findById(id, { isDeleted: false })
+    if (!post) {
+        const err = {
+            code: 404,
+            message: ERROR.POST_NOT_FOUND,
+            res: 0
         }
-        catch (error) {
-            const err = {
-                code: 400,
-                message: error,
-                res: 0
-            }
-            return handleError(res, err)
-        }
-
-        const url = fileUploadService.bucketUrl + filename
-        console.log(url)
-        newPost = await Post.findByIdAndUpdate(id, { img_url: url }, { new: true })
+        return handleError(res, err)
     }
 
-    const today = new Date()
     try {
+        const validate = await validateUser(req)
+        const { img_url } = await Post.findById(id)
+
+        if (!validate.isValid)
+            return handleError(res, validate.err)
+
+        const file = req.file
+        if (file) {
+            const filename = id.toString() + '_news' + path.extname(file.originalname)
+            const oldFilename = img_url.replace(fileUploadService.bucketUrl, '')
+            try {
+                await fileUploadService.deleteFile(oldFilename)
+                await fileUploadService.upload(file, filename)
+            }
+            catch (error) {
+                const err = {
+                    code: 400,
+                    message: error,
+                    res: 0
+                }
+                return handleError(res, err)
+            }
+
+            const url = fileUploadService.bucketUrl + filename
+            console.log(url)
+            newPost = await Post.findByIdAndUpdate(id, { img_url: url }, { new: true })
+        }
+
+        const today = new Date()
+
         console.log("updating")
         const newPost = await Post.findByIdAndUpdate(id, { ...req.body, lastUpdatedAt: today }, { new: true, })
         return res.json({
@@ -236,8 +248,18 @@ const updatePost = async (req, res) => {
 
 const deletePost = async (req, res) => {
     const { id } = req.params
-    const validate = await validateUser(req)
 
+    const post = await Post.findById(id, { isDeleted: false })
+    if (!post) {
+        const err = {
+            code: 404,
+            message: ERROR.POST_NOT_FOUND,
+            res: 0
+        }
+        return handleError(res, err)
+    }
+
+    const validate = await validateUser(req)
     if (!validate.isValid)
         return handleError(res, validate.err)
 
