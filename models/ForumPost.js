@@ -37,7 +37,8 @@ const ForumPostSchema = new Schema(
             default: false
         },
         img_url: {
-            type: String
+            type: String,
+            default: ""
         },
         comment_ids: [
             {
