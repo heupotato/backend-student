@@ -5,6 +5,8 @@ const validateRole = require('./validate-role')
 const handleError = require('../general/Error')
 const ForumReact = require('../models/ForumReact')
 const ForumPost = require('../models/ForumPost')
+const path = require('path')
+const fileUploadService = require('../utils/FileUpload')
 
 const getAllCommentsByPostId = async (req, res) => {
     const { id } = req.params
@@ -25,7 +27,30 @@ const createComment = async (req, res) => {
     const { id } = req.params
     const { uid } = req.user
     try {
-        const newComment = await ForumComment.create({ ...req.body, id_user: uid, id_post: id })
+        let newComment = await ForumComment.create({ ...req.body, id_user: uid, id_post: id })
+
+        const file = req.file
+        if (file) {
+            const filename = newComment.id.toString() + '_forum_comment' + path.extname(file.originalname)
+            try {
+                await fileUploadService.upload(file, filename)
+
+            }
+            catch (error) {
+                await ForumComment.findByIdAndDelete(newComment.id)
+                const err = {
+                    code: 400,
+                    message: error,
+                    res: 0
+                }
+                return handleError(res, err)
+            }
+
+            const url = fileUploadService.bucketUrl + filename
+            console.log(url)
+            newComment = await ForumComment.findByIdAndUpdate(newComment.id, { img_url: url }, { new: true })
+        }
+
         await ForumPost.findByIdAndUpdate(id,
             {
                 '$addToSet': { 'comment_ids': newComment._id }
@@ -49,7 +74,17 @@ const createComment = async (req, res) => {
 
 const deleteComment = async (req, res) => {
     const { id } = req.params
-    const { id_user } = await ForumComment.findById(id)
+
+    const oldComment = await ForumComment.findById(id)
+    if (!oldComment) {
+        const err = {
+            code: 404,
+            message: ERROR.COMMENT_NOT_FOUND,
+            res: 0
+        }
+        return handleError(res, err)
+    }
+    const { id_user } = oldComment
 
     const validateUser = validateRole.validateOwner(req, id_user)
     if (!validateRole.checkManagerRole(req)) {
@@ -76,14 +111,47 @@ const deleteComment = async (req, res) => {
 
 const updateComment = async (req, res) => {
     const { id } = req.params
-    const { id_user } = await ForumComment.findById(id)
+
+    const oldComment = await ForumComment.findById(id)
+    if (!oldComment) {
+        const err = {
+            code: 404,
+            message: ERROR.COMMENT_NOT_FOUND,
+            res: 0
+        }
+        return handleError(res, err)
+    }
+    const { id_user, img_url } = oldComment
 
     const validateUser = validateRole.validateOwner(req, id_user)
     if (!validateUser.isValid)
         return handleError(res, validateUser.err)
 
     try {
-        const newComment = await ForumComment.findByIdAndUpdate(id, req.body, { new: true })
+        const file = req.file
+        if (file) {
+            const filename = id.toString() + '_forum_comment' + path.extname(file.originalname)
+            const oldFilename = img_url.replace(fileUploadService.bucketUrl, '')
+            try {
+                await fileUploadService.deleteFile(oldFilename)
+                await fileUploadService.upload(file, filename)
+            }
+            catch (error) {
+                const err = {
+                    code: 400,
+                    message: error,
+                    res: 0
+                }
+                return handleError(res, err)
+            }
+
+            const url = fileUploadService.bucketUrl + filename
+            console.log(url)
+            await ForumComment.findByIdAndUpdate(id, { img_url: url }, { new: true })
+        }
+        const today = new Date()
+
+        const newComment = await ForumComment.findByIdAndUpdate(id, { ...req.body, lastUpdated: today }, { new: true })
         return res.json({
             msg: SUCCEED.UPDATE_COMMENT_SUCCESS,
             data: newComment,

@@ -16,7 +16,7 @@ const ForumCommentSchema = new Schema(
         },
         createdAt: {
             type: Date,
-            required: true
+            default: () => new Date()
         },
         isDeleted: {
             type: Boolean,
@@ -27,7 +27,8 @@ const ForumCommentSchema = new Schema(
             required: true
         },
         img_url: {
-            type: String
+            type: String,
+            default: ''
         },
         id_comment_reply_to: {
             type: Schema.Types.ObjectId,

@@ -23,7 +23,10 @@ const error = {
     BAD_REQUEST: 'BAD_REQUEST',
 
     //FILE 
-    NO_FILE_UPLOAD: 'NO_FILE_UPLOAD'
+    NO_FILE_UPLOAD: 'NO_FILE_UPLOAD',
+
+    //COMMENT
+    COMMENT_NOT_FOUND: 'COMMENT_NOT_FOUND'
 }
 
 module.exports = error
