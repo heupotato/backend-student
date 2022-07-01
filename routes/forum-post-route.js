@@ -5,6 +5,10 @@ const forumPostController = require('../controllers/forum-post-controller')
 const auth = require('../middleware/authenticator')
 const forumPostValidate = require('../validation/forum-post-validate')
 
+const multer = require('multer')
+
+const upload = multer()
+
 apiForumPostRoutes.get('/threads',
     forumPostController.getAllThreads)
 
@@ -32,12 +36,12 @@ apiForumPostRoutes.put('/topics/:id/delete',
     auth.checkManagerRoles,
     forumPostController.deleteTopic)
 
-apiForumPostRoutes.post('/topics/:id/posts',
+apiForumPostRoutes.post('/topics/:id/posts', upload.single('img'),
     auth.authenticateToken,
     forumPostValidate.createPostValidate,
     forumPostController.createPost)
 
-apiForumPostRoutes.put('/posts/:id',
+apiForumPostRoutes.put('/posts/:id', upload.single('img'),
     auth.authenticateToken,
     forumPostController.updatePost)
 

@@ -8,6 +8,8 @@ const handleError = require('../general/Error')
 const ERROR = require('../constants/error')
 const SUCCEED = require('../constants/succeed')
 const validateRole = require('./validate-role')
+const fileUploadService = require('../utils/FileUpload')
+const path = require('path')
 
 
 
@@ -152,7 +154,8 @@ const getAllPostsByTopicId = async (req, res) => {
                         populate: {
                             path: 'id_user',
                             select: 'full_name url_avatar'
-                        }
+                        },
+                        match: { isDeleted: false }
                     }
                 ]
             )
@@ -288,8 +291,30 @@ const getOnePost = async (req, res) => {
 const createPost = async (req, res) => {
     const { id } = req.params
     const { uid } = req.user
+    const file = req.file
+
     try {
-        const newPost = await ForumPost.create({ ...req.body, id_topic: id, id_user: uid })
+        let newPost = await ForumPost.create({ ...req.body, id_topic: id, id_user: uid })
+
+        if (file) {
+            const filename = newPost.id.toString() + '_forumpost' + path.extname(file.originalname)
+            try {
+                await fileUploadService.upload(file, filename)
+            }
+            catch (error) {
+                await ForumPost.findByIdAndDelete(newPost.id)
+                const err = {
+                    code: 400,
+                    message: error,
+                    res: 0
+                }
+                return handleError(res, err)
+            }
+
+            const url = fileUploadService.bucketUrl + filename
+            console.log(url)
+            newPost = await ForumPost.findByIdAndUpdate(newPost.id, { img_url: url }, { new: true })
+        }
         await Topic.findByIdAndUpdate(id,
             {
                 '$addToSet': { 'post_ids': newPost._id }
@@ -313,7 +338,17 @@ const createPost = async (req, res) => {
 
 const updatePost = async (req, res) => {
     const { id } = req.params
-    const { id_user } = await ForumPost.findById(id)
+    const oldPost = await ForumPost.findById(id)
+    if (!oldPost) {
+        const err = {
+            code: 404,
+            message: ERROR.POST_NOT_FOUND,
+            res: 0
+        }
+        return handleError(res, err)
+    }
+
+    const { id_user, img_url } = oldPost
 
     const validateUser = validateRole.validateOwner(req, id_user)
 
@@ -322,7 +357,29 @@ const updatePost = async (req, res) => {
     }
 
     try {
-        const newPost = await ForumPost.findByIdAndUpdate(id, req.body, { new: true })
+        const file = req.file
+        if (file) {
+            const filename = id.toString() + '_forumpost' + path.extname(file.originalname)
+            const oldFilename = img_url.replace(fileUploadService.bucketUrl, '')
+            try {
+                await fileUploadService.deleteFile(oldFilename)
+                await fileUploadService.upload(file, filename)
+            }
+            catch (error) {
+                const err = {
+                    code: 400,
+                    message: error,
+                    res: 0
+                }
+                return handleError(res, err)
+            }
+
+            const url = fileUploadService.bucketUrl + filename
+            console.log(url)
+            await ForumPost.findByIdAndUpdate(id, { img_url: url }, { new: true })
+        }
+        const today = new Date()
+        const newPost = await ForumPost.findByIdAndUpdate(id, { ...req.body, lastUpdatedAt: today }, { new: true })
         return res.json({
             msg: SUCCEED.UPDATE_POST_SUCCESS,
             data: newPost,
@@ -341,7 +398,18 @@ const updatePost = async (req, res) => {
 
 const deletePost = async (req, res) => {
     const { id } = req.params
-    const { id_user } = await ForumPost.findById(id)
+
+    const oldPost = await ForumPost.findById(id)
+    if (!oldPost) {
+        const err = {
+            code: 404,
+            message: ERROR.POST_NOT_FOUND,
+            res: 0
+        }
+        return handleError(res, err)
+    }
+
+    const { id_user } = oldPost
 
     const validateUser = validateRole.validateOwner(req, id_user)
 
