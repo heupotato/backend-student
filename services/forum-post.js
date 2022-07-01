@@ -10,6 +10,7 @@ const SUCCEED = require('../constants/succeed')
 const validateRole = require('./validate-role')
 const fileUploadService = require('../utils/FileUpload')
 const path = require('path')
+const dateHelper = require('../utils/DateHelper')
 
 
 
@@ -26,10 +27,23 @@ const getAllThreads = async (req, res) => {
                 const topicNum = threadData.topic_ids.length
                 const topicIdList = threadData.topic_ids
                 const postNum = await ForumPost.countDocuments({ isDeleted: false, id_topic: { $in: topicIdList } })
+                const latestPost = await ForumPost
+                    .findOne({ isDeleted: false, id_topic: { $in: topicIdList } })
+                    .sort({ createdAt: -1 })
+                    .populate('id_user', 'full_name')
+                let author = "N/A"
+                let createdAt = "N/A"
+
+                if (latestPost) {
+                    author = latestPost.id_user.full_name
+                    createdAt = dateHelper.convertDateInterval(latestPost.createdAt)
+                }
                 return {
-                    ...threadData,
+                    thread,
                     topicNum,
-                    postNum
+                    postNum,
+                    author,
+                    createdAt
                 }
             })
         )
@@ -97,7 +111,7 @@ const getAllTopicsByThreadId = async (req, res) => {
                 const startedAuthor = oldestPost ? oldestPost.id_user.full_name : "N/A"
                 if (latestPost) {
                     author = latestPost.id_user.full_name
-                    date = latestPost.createdAt
+                    date = dateHelper.convertDateInterval(latestPost.createdAt)
                 }
 
                 return {

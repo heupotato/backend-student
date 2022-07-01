@@ -4,10 +4,14 @@ const forumPostValidate = require('../validation/forum-post-validate')
 const forumCommentController = require('../controllers/forum-comment-react-controller')
 const auth = require('../middleware/authenticator')
 
+const multer = require('multer')
+
+const upload = multer()
+
 apiForumCommentRoutes.get('/posts/:id/comments',
     forumCommentController.getAllCommentsByPostId)
 
-apiForumCommentRoutes.post('/posts/:id/comments',
+apiForumCommentRoutes.post('/posts/:id/comments', upload.single('img'),
     auth.authenticateToken,
     forumPostValidate.createCommentValidate,
     forumCommentController.createComment)
@@ -16,7 +20,7 @@ apiForumCommentRoutes.put('/comments/:id/delete',
     auth.authenticateToken,
     forumCommentController.deleteComment)
 
-apiForumCommentRoutes.put('/comments/:id',
+apiForumCommentRoutes.put('/comments/:id', upload.single('img'),
     auth.authenticateToken,
     forumCommentController.updateComment)
 
