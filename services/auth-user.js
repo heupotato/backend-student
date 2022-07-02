@@ -36,7 +36,13 @@ const login = async (req, res) => {
         }
         return handleError(res, err)
     }
-    const token = await JWT.generateToken({ uid: user._id, role: user.role })
+    const token = await JWT.generateToken({
+        uid: user._id,
+        role: user.role,
+        full_name: user.full_name,
+        username: user.username,
+        url_avatar: user.url_avatar
+    })
     return res.json({
         msg: SUCCEED.LOGIN_SUCCEED,
         token,
