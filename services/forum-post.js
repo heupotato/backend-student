@@ -182,9 +182,11 @@ const getAllPostsByTopicId = async (req, res) => {
         postList = await Promise.all(
             postList.map(async post => {
                 const reactNum = await getReactsNum(post.id)
+                const createdAtStr = dateHelper.convertDateInterval(post.createdAt)
                 return {
                     post,
-                    reactNum
+                    reactNum,
+                    createdAtStr
                 }
             })
         )
@@ -455,6 +457,7 @@ const getLatestPost = async () => {
         .sort({ createdAt: -1 })
         .limit(4)
         .populate('id_user', 'full_name')
+        .select('-comment_ids -react_ids -__v -id_topic')
     return latestPost
 }
 

@@ -343,7 +343,6 @@ const index = async (req, res) => {
                 .populate('id_user', 'full_name')
                 .limit(4)
                 .sort({ lastUpdatedAt: -1 })
-            console.log(listPosts.length)
             return {
                 category: category.category,
                 posts: listPosts
@@ -370,7 +369,7 @@ const validateUser = async (req) => {
     const { uid, role } = req.user
     const { id_user } = await Post.findById(id)
 
-    if (role !== 'admin')
+    if (role !== 'admin' && role !== 'manager')
         if (id_user.toString() !== uid) {
             const err = {
                 code: 405,

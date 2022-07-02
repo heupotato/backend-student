@@ -14,13 +14,11 @@ const DIVISIONS = [
 
 const convertDateInterval = (dateStr) => {
     const date = new Date(dateStr)
-    console.log(date)
     const now = new Date()
     let duration = (date - now) / 1000
     for (let i = 0; i < DIVISIONS.length; i++) {
         const division = DIVISIONS[i]
         if (Math.abs(duration) < division.amount) {
-            console.log(formatter.format(Math.round(duration), division.name))
             return formatter.format(Math.round(duration), division.name)
         }
         duration /= division.amount
