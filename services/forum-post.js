@@ -94,6 +94,7 @@ const getAllTopicsByThreadId = async (req, res) => {
 
         topicList = await Promise.all(
             topicList.map(async topic => {
+                const topicId = topic.id
                 const topicName = topic.topic
                 const totalPosts = topic.post_ids.length
                 const postIds = topic.post_ids
@@ -122,6 +123,7 @@ const getAllTopicsByThreadId = async (req, res) => {
                     author,
                     date,
                     startedAuthor,
+                    topicId,
                     topicName
                 }
             })
