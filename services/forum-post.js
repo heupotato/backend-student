@@ -193,11 +193,17 @@ const getAllPostsByTopicId = async (req, res) => {
         postList = await Promise.all(
             postList.map(async post => {
                 const reactNum = await getReactsNum(post.id)
+                const createdAtTime = dateHelper.formatDateString(post.createdAt)
                 const createdAtStr = dateHelper.convertDateInterval(post.createdAt)
+                const lastUpdatedAtTime = dateHelper.formatDateString(post.lastUpdatedAt)
+                const lastUpdatedAtStr = dateHelper.convertDateInterval(post.lastUpdatedAt)
                 return {
                     post,
                     reactNum,
-                    createdAtStr
+                    createdAtTime,
+                    createdAtStr,
+                    lastUpdatedAtTime,
+                    lastUpdatedAtStr
                 }
             })
         )
