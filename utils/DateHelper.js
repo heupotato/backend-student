@@ -25,8 +25,13 @@ const convertDateInterval = (dateStr) => {
     }
 }
 
+const formatDateString = (dateStr) => {
+    const date = new Date(dateStr)
+    return date.toLocaleString()
+}
 const dateHelper = {
-    convertDateInterval
+    convertDateInterval,
+    formatDateString
 }
 
 module.exports = dateHelper
