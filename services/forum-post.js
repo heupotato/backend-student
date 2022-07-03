@@ -131,6 +131,7 @@ const getAllTopicsByThreadId = async (req, res) => {
         return res.json({
             msg: SUCCEED.GET_TOPICLIST_SUCCESS,
             data: {
+                threadId: id,
                 thread,
                 totalTopicsInThread,
                 postNum,
@@ -160,6 +161,10 @@ const getAllPostsByTopicId = async (req, res) => {
     try {
         const foundTopic = await Topic.findById(id)
         if (!foundTopic) throw (ERROR.TOPIC_NOT_FOUND)
+
+        const thread = await Thread.findOne({ topic_ids: id })
+        const threadId = thread.id
+        const threadName = thread.thread
         const { topic } = foundTopic
         const totalPosts = await ForumPost.countDocuments({ id_topic: id, isDeleted: false })
         let postList = await ForumPost.find({ id_topic: id, isDeleted: false })
@@ -204,6 +209,8 @@ const getAllPostsByTopicId = async (req, res) => {
         return res.json({
             msg: SUCCEED.GET_POST_SUCCESS,
             data: {
+                threadId,
+                threadName,
                 id,
                 topic,
                 current: page,
