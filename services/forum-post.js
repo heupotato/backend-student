@@ -448,9 +448,9 @@ const deletePost = async (req, res) => {
     const { id_user } = oldPost
 
     const validateUser = validateRole.validateOwner(req, id_user)
-
-    if (!validateUser.isValid) {
-        return handleError(res, validateUser.err)
+    if (!validateRole.checkManagerRole(req)) {
+        if (!validateUser.isValid)
+            return handleError(res, validateUser.err)
     }
 
     try {
