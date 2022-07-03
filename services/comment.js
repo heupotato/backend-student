@@ -67,14 +67,14 @@ const deleteComment = async (req, res) => {
 const validateUser = async (req) => {
     const { id } = req.params
     const { id_user } = await Comment.findById(id)
-    const { role, userId } = req.user
+    const { role, uid } = req.user
 
     if (role === 'admin' || role === 'manager')
         return {
             isValid: true
         }
 
-    if (id_user.toString() !== userId) {
+    if (id_user.toString() !== uid.toString()) {
         const err = {
             code: 405,
             message: ERROR.NOT_ALLOW,
