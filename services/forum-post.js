@@ -76,8 +76,10 @@ const getAllTopicsByThreadId = async (req, res) => {
     const page = req.query.page || 1
 
     try {
+        const foundThread = await Thread.findById(id)
+        if (!foundThread) throw (ERROR.THREAD_NOT_FOUND)
         const totalTopicsInThread = await Topic.countDocuments({ isDeleted: false, id_thread: id })
-        const { topic_ids, thread } = await Thread.findById(id)
+        const { topic_ids, thread } = foundThread
         const postNum = await ForumPost.countDocuments({ isDeleted: false, id_topic: { $in: topic_ids } })
         let topicList = await Topic.find({ id_thread: id, isDeleted: false })
             .sort({
@@ -142,7 +144,7 @@ const getAllTopicsByThreadId = async (req, res) => {
     catch (error) {
         const err = {
             code: 400,
-            message: error.message,
+            message: error.message || error,
             res: 0
         }
         return handleError(res, err)
@@ -154,7 +156,9 @@ const getAllPostsByTopicId = async (req, res) => {
     const perPage = 4
     const page = req.query.page || 1
     try {
-        const { topic } = await Topic.findById(id)
+        const foundTopic = await Topic.findById(id)
+        if (!foundTopic) throw (ERROR.TOPIC_NOT_FOUND)
+        const { topic } = foundTopic
         const totalPosts = await ForumPost.countDocuments({ id_topic: id, isDeleted: false })
         let postList = await ForumPost.find({ id_topic: id, isDeleted: false })
             .populate(
@@ -198,6 +202,7 @@ const getAllPostsByTopicId = async (req, res) => {
         return res.json({
             msg: SUCCEED.GET_POST_SUCCESS,
             data: {
+                id,
                 topic,
                 current: page,
                 totalPages: Math.ceil(totalPosts / perPage),
@@ -211,7 +216,7 @@ const getAllPostsByTopicId = async (req, res) => {
     catch (error) {
         const err = {
             code: 400,
-            message: error.message,
+            message: error.message || error,
             res: 0
         }
         return handleError(res, err)
