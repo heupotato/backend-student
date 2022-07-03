@@ -387,9 +387,9 @@ const updatePost = async (req, res) => {
     const { id_user, img_url } = oldPost
 
     const validateUser = validateRole.validateOwner(req, id_user)
-
-    if (!validateUser.isValid) {
-        return handleError(res, validateUser.err)
+    if (!validateRole.checkManagerRole(req)) {
+        if (!validateUser.isValid)
+            return handleError(res, validateUser.err)
     }
 
     try {
@@ -494,11 +494,13 @@ const getThreadList = async () => {
     let threadList = await Thread.find()
     threadList = await Promise.all(
         threadList.map(async thread => {
+            const threadId = thread.id
             const threadName = thread.thread
             const topicNum = thread.topic_ids.length
             const topicIdList = thread.topic_ids
             const postNum = await ForumPost.countDocuments({ isDeleted: false, id_topic: { $in: topicIdList } })
             return {
+                threadId,
                 threadName,
                 topicNum,
                 postNum
@@ -509,11 +511,23 @@ const getThreadList = async () => {
 }
 
 const getRecentTopic = async () => {
-    const recentTopic = await Topic
+    let recentTopic = await Topic
         .find({ isDeleted: false })
         .sort({ createdAt: -1 })
         .select('topic createdAt')
         .limit(5)
+    recentTopic = await Promise.all(
+        recentTopic.map(async topic => {
+            const topicId = topic.id
+            const topicName = topic.topic
+            const createdAtStr = dateHelper.convertDateInterval(topic.createdAt)
+            return {
+                topicId,
+                topicName,
+                createdAtStr
+            }
+        })
+    )
     return recentTopic
 }
 
