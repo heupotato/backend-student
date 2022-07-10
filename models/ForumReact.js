@@ -12,7 +12,7 @@ const ForumReactSchema = new Schema(
         },
         id_post: {
             type: Schema.Types.ObjectId,
-            ref: 'topic'
+            ref: 'post_forum'
         },
         type: {
             type: String,
