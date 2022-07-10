@@ -198,9 +198,11 @@ const getAllPostsByTopicId = async (req, res) => {
                 const createdAtStr = dateHelper.convertDateInterval(post.createdAt)
                 const lastUpdatedAtTime = dateHelper.formatDateString(post.lastUpdatedAt)
                 const lastUpdatedAtStr = dateHelper.convertDateInterval(post.lastUpdatedAt)
+                const isReacted = await getisReacted(req, post.id)
                 return {
                     post,
                     reactNum,
+                    isReacted,
                     createdAtTime,
                     createdAtStr,
                     lastUpdatedAtTime,
@@ -531,6 +533,29 @@ const getRecentTopic = async () => {
         })
     )
     return recentTopic
+}
+
+const getisReacted = async (req, id) => {
+    if (!req.body)
+        return {
+            dislike: false,
+            like: false
+        }
+    const { id_user } = req.body
+    console.log("body", id_user)
+    const reactData = await ForumReact.findOne({ id_user: id_user, id_post: id, isDeleted: false })
+    console.log(reactData)
+    if (!reactData)
+        return {
+            dislike: false,
+            like: false
+        }
+    const { type } = reactData
+    const isDislike = type === 'Dislike' ? true : false
+    return {
+        dislike: isDislike,
+        like: !isDislike
+    }
 }
 
 const forumPostService = {
