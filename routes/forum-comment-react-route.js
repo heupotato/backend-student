@@ -29,7 +29,7 @@ apiForumCommentRoutes.post('/posts/:id/react',
     forumPostValidate.createReactValidate,
     forumCommentController.createReact)
 
-apiForumCommentRoutes.put('/react/:id/delete',
+apiForumCommentRoutes.put('/posts/:id_post/react/delete',
     auth.authenticateToken,
     forumCommentController.deleteReact)
 

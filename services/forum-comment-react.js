@@ -205,15 +205,18 @@ const createReact = async (req, res) => {
 }
 
 const deleteReact = async (req, res) => {
-    const { id } = req.params
-    const { id_user } = await ForumReact.findById(id)
-
-    const validateUser = validateRole.validateOwner(req, id_user)
-    if (!validateUser.isValid)
-        return handleError(res, validateUser.err)
-
+    const { id_post } = req.params
+    const { uid } = req.user
     try {
-        const newReact = await ForumReact.findByIdAndUpdate(id, { isDeleted: true }, { new: true })
+        const react = await ForumReact.findOne({ id_user: uid, id_post: id_post })
+        if (!react) throw (ERROR.REACT_NOT_EXIST)
+
+        const { id, id_user } = react
+        const validateUser = validateRole.validateOwner(req, id_user)
+        if (!validateUser.isValid)
+            return handleError(res, validateUser.err)
+
+        await ForumReact.findByIdAndUpdate(id, { isDeleted: true }, { new: true })
         return res.json({
             msg: SUCCEED.DELETE_REACT_SUCCESS,
             res: 1
@@ -222,7 +225,7 @@ const deleteReact = async (req, res) => {
     catch (error) {
         const err = {
             code: 400,
-            message: error.message,
+            message: error.message || error,
             res: 1
         }
         return handleError(res, err)
