@@ -28,7 +28,10 @@ const error = {
     NO_FILE_UPLOAD: 'NO_FILE_UPLOAD',
 
     //COMMENT
-    COMMENT_NOT_FOUND: 'COMMENT_NOT_FOUND'
+    COMMENT_NOT_FOUND: 'COMMENT_NOT_FOUND',
+
+    //REACT
+    REACT_NOT_EXIST: 'REACT_NOT_EXIST'
 }
 
 module.exports = error
