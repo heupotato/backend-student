@@ -536,15 +536,14 @@ const getRecentTopic = async () => {
 }
 
 const getisReacted = async (req, id) => {
-    if (!req.body)
+    if (!req.query.id_user)
         return {
             dislike: false,
             like: false
         }
-    const { id_user } = req.body
+    const { id_user } = req.query
     console.log("body", id_user)
     const reactData = await ForumReact.findOne({ id_user: id_user, id_post: id, isDeleted: false })
-    console.log(reactData)
     if (!reactData)
         return {
             dislike: false,
