@@ -481,7 +481,7 @@ const getLatestPost = async () => {
         .sort({ createdAt: -1 })
         .limit(4)
         .populate('id_user', 'full_name')
-        .select('-comment_ids -react_ids -__v -id_topic')
+        .select('-comment_ids -react_ids -__v')
     return latestPost
 }
 
