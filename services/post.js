@@ -202,9 +202,10 @@ const updatePost = async (req, res) => {
             return handleError(res, validate.err)
 
         const file = req.file
+        var newPost;
         if (file) {
             const filename = id.toString() + '_news' + path.extname(file.originalname)
-            const oldFilename = img_url.replace(fileUploadService.bucketUrl, '')
+            const oldFilename = img_url ? img_url.replace(fileUploadService.bucketUrl, '') : ''
             try {
                 await fileUploadService.deleteFile(oldFilename)
                 await fileUploadService.upload(file, filename)
@@ -226,7 +227,7 @@ const updatePost = async (req, res) => {
         const today = new Date()
 
         console.log("updating")
-        const newPost = await Post.findByIdAndUpdate(id, { ...req.body, lastUpdatedAt: today }, { new: true, })
+        newPost = await Post.findByIdAndUpdate(id, { ...req.body, lastUpdatedAt: today }, { new: true, })
         return res.json({
             msg: SUCCEED.UPDATE_POST_SUCCESS,
             data: newPost,
