@@ -400,7 +400,7 @@ const updatePost = async (req, res) => {
         const file = req.file
         if (file) {
             const filename = id.toString() + '_forumpost' + path.extname(file.originalname)
-            const oldFilename = img_url.replace(fileUploadService.bucketUrl, '')
+            const oldFilename = img_url ? img_url.replace(fileUploadService.bucketUrl, '') : ''
             try {
                 await fileUploadService.deleteFile(oldFilename)
                 await fileUploadService.upload(file, filename)
