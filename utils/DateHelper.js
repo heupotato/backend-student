@@ -29,9 +29,14 @@ const formatDateString = (dateStr) => {
     const date = new Date(dateStr)
     return date.toLocaleString()
 }
+
+const getTimeStamp = () => {
+    return Math.floor(Date.now() / 1000).toString()
+}
 const dateHelper = {
     convertDateInterval,
-    formatDateString
+    formatDateString,
+    getTimeStamp
 }
 
 module.exports = dateHelper

@@ -6,6 +6,7 @@ const SUCCEED = require('../constants/succeed')
 const { populate } = require('../models/Post')
 const path = require('path')
 const fileUploadService = require('../utils/FileUpload')
+const dateHelper = require('../utils/DateHelper')
 
 const ObjectId = require('mongoose').Types.ObjectId;
 
@@ -185,6 +186,7 @@ const updatePost = async (req, res) => {
     const { id } = req.params
 
     const post = await Post.findById(id, { isDeleted: false })
+
     if (!post) {
         const err = {
             code: 404,
@@ -204,7 +206,7 @@ const updatePost = async (req, res) => {
         const file = req.file
         var newPost;
         if (file) {
-            const filename = id.toString() + '_news' + path.extname(file.originalname)
+            const filename = id.toString() + '_news' + dateHelper.getTimeStamp() + path.extname(file.originalname)
             const oldFilename = img_url ? img_url.replace(fileUploadService.bucketUrl, '') : ''
             try {
                 await fileUploadService.deleteFile(oldFilename)
@@ -289,7 +291,7 @@ const createPost = async (req, res) => {
 
     const file = req.file
     if (file) {
-        const filename = newPost.id.toString() + '_news' + path.extname(file.originalname)
+        const filename = newPost.id.toString() + '_news' + dateHelper.getTimeStamp() + path.extname(file.originalname)
         try {
             await fileUploadService.upload(file, filename)
 
