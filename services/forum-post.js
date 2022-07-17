@@ -337,7 +337,7 @@ const createPost = async (req, res) => {
         let newPost = await ForumPost.create({ ...req.body, id_topic: id, id_user: uid })
 
         if (file) {
-            const filename = newPost.id.toString() + '_forumpost' + path.extname(file.originalname)
+            const filename = newPost.id.toString() + '_forumpost' + dateHelper.getTimeStamp() + path.extname(file.originalname)
             try {
                 await fileUploadService.upload(file, filename)
             }
@@ -399,7 +399,7 @@ const updatePost = async (req, res) => {
     try {
         const file = req.file
         if (file) {
-            const filename = id.toString() + '_forumpost' + path.extname(file.originalname)
+            const filename = id.toString() + '_forumpost' + dateHelper.getTimeStamp() + path.extname(file.originalname)
             const oldFilename = img_url ? img_url.replace(fileUploadService.bucketUrl, '') : ''
             try {
                 await fileUploadService.deleteFile(oldFilename)
